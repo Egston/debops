@@ -191,7 +191,7 @@ def unlock(encfs_decrypted, encfs_encrypted, verbose):
 
 parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(
-    help='action to perform. Use `%(prog)s --help <action>` for further help.')
+    help='action to perform. Use `%(prog)s <action> --help` for further help.')
 
 p = subparsers.add_parser('init')
 p.add_argument('recipients', nargs='*',
