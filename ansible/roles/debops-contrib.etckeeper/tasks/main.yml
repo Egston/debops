@@ -16,6 +16,7 @@
 
 - name: Saving uncommmitted changes in /etc
   command: "etckeeper commit 'Ansible role {{ role_path | basename }}: saving uncommitted changes in /etc'"
+  changed_when: False
   when: etckeeper__register_unclean_before.rc == 0
 ## ]]]
 
