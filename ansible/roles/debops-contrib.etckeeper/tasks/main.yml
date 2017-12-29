@@ -12,6 +12,7 @@
   register: etckeeper__register_unclean_before
   failed_when: False
   changed_when: False
+  check_mode: no
 
 - name: Saving uncommmitted changes in /etc
   command: "etckeeper commit 'Ansible role {{ role_path | basename }}: saving uncommitted changes in /etc'"
@@ -153,6 +154,7 @@
   register: etckeeper__register_unclean_after
   failed_when: etckeeper__register_unclean_after.rc > 1
   changed_when: False
+  check_mode: no
 
 - name: Saving uncommitted changes in /etc after /etc/.gitignore modification
   command: "etckeeper commit 'Ansible role {{ role_path | basename }}: saving uncommitted changes in /etc/ after /etc/.gitignore modification'"
