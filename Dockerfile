@@ -30,8 +30,10 @@ ENV DOCKER_ENVIRONMENT true
 RUN apt-get -q update \
     && DEBIAN_FRONTEND=noninteractive apt-get \
        --no-install-recommends -yq install \
+       iproute2 \
        levee \
        python-apt \
+       python-ldap \
        python-pip \
        python-wheel \
        python-setuptools \

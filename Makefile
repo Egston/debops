@@ -14,7 +14,7 @@ check: fail-if-git-dirty
 
 .PHONY: clean
 clean:          ## Clean up project directory
-clean: clean-tests
+clean: clean-tests clean-sdist clean-wheel
 
 .PHONY: docker
 docker:         ## Check Docker image build
@@ -28,6 +28,10 @@ docs: test-docs
 pep8:           ## Test Python PEP8 compliance
 pep8: test-pep8
 
+.PHONY: shell
+shell:           ## Test shell script syntax
+shell: test-shell
+
 .PHONY: syntax
 syntax:         ## Check Ansible playbook syntax
 syntax: test-playbook-syntax
@@ -40,14 +44,59 @@ test: test-all
 yaml:           ## Test YAML syntax using yamllint
 yaml: test-yaml
 
+.PHONY: sdist
+sdist:          ## Create Python sdist package
+sdist: clean-sdist
+	@python setup.py sdist
+
+.PHONY: sdist-quiet
+sdist-quiet: clean-sdist
+	@python setup.py --quiet sdist
+
+.PHONY: sdist-sign
+sdist-sign:     ## Create signed Python sdist package
+sdist-sign: sdist
+	@gpg --detach-sign --armor dist/debops-*.tar.gz
+
+.PHONY: clean-sdist
+clean-sdist:
+	@rm -vrf debops.egg-info dist/debops-*.tar.gz*
+
+.PHONY: wheel
+wheel:          ## Create Python wheel package
+wheel: clean-wheel
+	@python setup.py bdist_wheel
+
+.PHONY: wheel-quiet
+wheel-quiet: clean-wheel
+	@python setup.py --quiet bdist_wheel
+
+.PHONY: wheel-sign
+wheel-sign:     ## Create signed Python wheel package
+wheel-sign: wheel
+	@gpg --detach-sign --armor dist/debops-*.whl
+
+.PHONY: clean-wheel
+clean-wheel:
+	@rm -vrf build debops.egg-info dist/debops-*.whl*
+
+.PHONY: twine-upload
+twine-upload:    ## Upload Python packages to PyPI
+	@twine upload dist/*
+
 .PHONY: test-all
-test-all: clean-tests test-pep8 test-debops-tools test-docs test-playbook-syntax test-yaml test-docker-build
+test-all: clean-tests test-pep8 test-debops-tools test-docs test-playbook-syntax test-yaml test-shell test-docker-build
 
 .PHONY: test-pep8
 test-pep8:
 	@printf "%s\n" "Testing PEP8 compliance using pycodestyle..."
 	@pycodestyle --show-source --statistics .
-	@./lib/tests/check-pep8 || true
+	@./lib/tests/check-pep8
+
+.PHONY: test-shell
+test-shell:
+	@printf "%s\n" "Testing shell syntax using shellcheck..."
+	@./lib/tests/check-shell
 
 .PHONY: test-docker-build
 test-docker-build:
@@ -55,7 +104,7 @@ test-docker-build:
 
 .PHONY: clean-tests
 clean-tests:
-	@rm -vrf .coverage docs/_build/*
+	@rm -vrf .coverage docs/_build/* docs/ansible/roles/*/defaults.rst
 
 .PHONY: test-docs
 test-docs:
@@ -72,12 +121,12 @@ test-playbook-syntax:
 .PHONY: test-yaml
 test-yaml:
 	@printf "%s\n" "Testing YAML syntax using yamllint..."
-	@yamllint . || true
+	@yamllint .
 
 .PHONY: test-debops-tools
 test-debops-tools:
 	@printf "%s\n" "Testing debops-tools using nose2..."
-	@nose2 --start-dir=lib/debops-tools --with-coverage
+	@nose2 --with-coverage
 
 .PHONY: fail-if-git-dirty
 fail-if-git-dirty:

@@ -127,6 +127,7 @@ export CI_JOB_NAME="#{ENV['CI_JOB_NAME']}"
 export CI_JOB_STAGE="#{ENV['CI_JOB_STAGE']}"
 export JANE_TEST_PLAY="#{ENV['JANE_TEST_PLAY']}"
 export JANE_FORCE_TESTS="#{ENV['JANE_FORCE_TESTS']}"
+export JANE_INVENTORY_DIRS="#{ENV['JANE_INVENTORY_DIRS']}"
 export JANE_INVENTORY_GROUPS="#{ENV['JANE_INVENTORY_GROUPS']}"
 export JANE_INVENTORY_HOSTVARS="#{ENV['JANE_INVENTORY_HOSTVARS']}"
 export JANE_KEEP_BOX="#{ENV['JANE_KEEP_BOX']}"
@@ -242,17 +243,19 @@ EOF
 
     if [ -n "${ansible_from_devel}" ] ; then
         jane notify install "Installing Ansible from GitHub..."
-        /vagrant/ansible/roles/debops.debops/files/script/bootstrap-ansible.sh "${ansible_from_devel}"
+        /vagrant/ansible/roles/debops.ansible/files/script/bootstrap-ansible "${ansible_from_devel}"
     fi
 
     jane notify install "Installing Ansible requirements via APT..."
     DEBIAN_FRONTEND=noninteractive apt-get -y \
     --no-install-recommends install \
+        acl \
         apt-transport-https \
         encfs \
         git \
         haveged \
         jo \
+        jq \
         make \
         python-apt \
         python-jinja2 \
@@ -373,7 +376,19 @@ SCRIPT
 $provision_controller = <<SCRIPT
 set -o nounset -o pipefail -o errexit
 
+readonly PROVISION_ANSIBLE_FROM="#{ENV['ANSIBLE_FROM'] || 'debian'}"
+
 jane notify info "Configuring Ansible Controller host..."
+
+ansible_from_pypi=""
+if [ "${PROVISION_ANSIBLE_FROM}" == "pypi" ] ; then
+    ansible_from_pypi="ansible"
+fi
+
+jane notify install "Installing test requirements via PyPI..."
+sudo pip install debops testinfra ${ansible_from_pypi}
+jane notify cache "Cleaning up cache directories..."
+sudo rm -rf /root/.cache/* /tmp/*
 
 if ! [ -e .local/share/debops/debops ] ; then
     mkdir -p src .local/share/debops
@@ -401,6 +416,14 @@ SCRIPT
 VAGRANT_NODES = ENV['VAGRANT_NODES'] || 0
 VAGRANT_NODE_BOX = ENV['VAGRANT_NODE_BOX'] || 'debian/stretch64'
 
+# Vagrant removed the atlas.hashicorp.com to vagrantcloud.com
+# redirect. The value of DEFAULT_SERVER_URL in Vagrant versions
+# less than 1.9.3 is atlas.hashicorp.com. This breaks the fetching
+# and updating of boxes as they are now stored in
+# vagrantcloud.com instead of atlas.hashicorp.com.
+# https://github.com/hashicorp/vagrant/issues/9442
+Vagrant::DEFAULT_SERVER_URL.replace('https://vagrantcloud.com')
+
 Vagrant.configure("2") do |config|
 
     config.vm.define "master", primary: true do |subconfig|
@@ -416,6 +439,10 @@ Vagrant.configure("2") do |config|
 
             libvirt.random_hostname = true
             libvirt.memory = ENV['VAGRANT_MASTER_MEMORY'] || '512'
+
+            if ENV['GITLAB_CI'] != "true"
+                libvirt.memory = ENV['VAGRANT_MASTER_MEMORY'] || '1024'
+            end
 
             if ENV['VAGRANT_BOX'] || 'debian/stretch64' == 'debian/stretch64'
                 override.ssh.insert_key = false

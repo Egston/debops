@@ -1033,6 +1033,8 @@
 .. _APT: https://en.wikipedia.org/wiki/Advanced_Packaging_Tool
 .. _Advanced Packaging Tool: https://en.wikipedia.org/wiki/Advanced_Packaging_Tool
 
+.. _Ubuntu: https://www.ubuntu.com/
+
 .. _Free software: https://en.wikipedia.org/wiki/Free_software
 .. _GPL-3.0: https://en.wikipedia.org/wiki/GNU_GPLv3
 .. _Open-source software: https://en.wikipedia.org/wiki/Open-source_software
@@ -1129,6 +1131,7 @@
 .. _SKS OpenPGP keyserver pool: https://sks-keyservers.net/
 .. Prefer the last one.
 
+.. _Elastic: https://elastic.co/
 .. _OpenPGP Best Practices: https://help.riseup.net/en/security/message-security/openpgp/best-practices
 .. _HashiCorp: https://en.wikipedia.org/wiki/HashiCorp
 .. _HashiCorp Security Policy: https://www.hashicorp.com/security.html
@@ -1140,6 +1143,9 @@
 .. _Infrastructures.Org: http://www.infrastructures.org/
 .. _Debian Policy Manual: https://www.debian.org/doc/debian-policy/
 .. _Computing Infrastructure Setup Protocols: http://infrastructure.blueprint.org/Home
+
+.. _CRAN: https://cran.r-project.org/
+.. _The Comprehensive R Archive Network: https://cran.r-project.org/
 
 .. _ReadTheDocs: https://readthedocs.org/
 

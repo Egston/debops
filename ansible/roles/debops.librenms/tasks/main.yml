@@ -106,12 +106,39 @@
     mode: '0600'
   tags: [ 'role::librenms:config', 'role::librenms:database' ]
 
+- name: Download composer.phar if requested
+  get_url:
+    url: '{{ librenms__composer_phar_url }}'
+    dest: '{{ librenms__install_path }}'
+    mode: '0640'
+  become: True
+  become_user: '{{ librenms__user }}'
+  when: librenms__composer_phar|bool
+
+- name: Install missing PHP packages via composer.phar
+  command: php composer.phar install
+  args:
+    chdir: '{{ librenms__install_path }}'
+  become: True
+  become_user: '{{ librenms__user }}'
+  when: librenms__composer_phar|bool
+  register: librenms__register_composer_phar
+  changed_when: not "Nothing to install or update" in librenms__register_composer_phar.stderr|d('')
+
+- name: Install missing PHP packages via system-wide composer
+  composer:
+    command: install
+    working_dir: '{{ librenms__install_path }}'
+  become: True
+  become_user: '{{ librenms__user }}'
+  when: not librenms__composer_phar|bool
+
 - name: Initialize database
   command: php build-base.php
   args:
     chdir: '{{ librenms__install_path }}'
   become_user: '{{ librenms__user }}'
-  when: (librenms__register_database_status|d() and librenms__register_database_status.changed)
+  when: (librenms__register_database_status|d() and librenms__register_database_status is changed)
   tags: [ 'role::librenms:database' ]
 
 - name: Get list of existing users from LibreNMS database

@@ -23,6 +23,12 @@
 from __future__ import (absolute_import, division, print_function)
 from operator import itemgetter
 
+try:
+    unicode = unicode
+except NameError:
+    # py3
+    unicode = str
+
 __metaclass__ = type
 
 
@@ -42,7 +48,8 @@ def _parse_kv_value(current_data, new_data, data_index, *args, **kwargs):
                                                  float, bool, dict))):
                 current_data.update({'value': new_value})
 
-            if (old_value is not None and old_state in ['comment']):
+            if (old_value is not None and old_state in ['comment'] and
+                    current_data['state'] != 'comment'):
                 current_data.update({'state': 'present'})
 
         elif isinstance(new_value, list):
@@ -210,7 +217,7 @@ def parse_kv_config(*args, **kwargs):
             elif not all(x in ['name', 'option', 'state', 'comment',
                                'section', 'weight', 'value', 'copy_id_from']
                          for x in element):
-                for key, value in element.iteritems():
+                for key, value in element.items():
                     current_param = (parsed_config[key].copy()
                                      if key in parsed_config else {})
                     current_param.update({
@@ -235,7 +242,7 @@ def parse_kv_config(*args, **kwargs):
     # Expand the dictionary of configuration options into a list,
     # and return sorted by weight
     output = []
-    for key, params in parsed_config.iteritems():
+    for key, params in parsed_config.items():
         if isinstance(params.get('value'), dict):
             unsorted_values = []
             current_value = params.get('value').copy()
@@ -383,7 +390,7 @@ def parse_kv_items(*args, **kwargs):
     # Expand the dictionary of configuration options into a list,
     # and return sorted by weight
     output = []
-    for key, params in parsed_config.iteritems():
+    for key, params in parsed_config.items():
         if isinstance(params.get('value'), dict):
             unsorted_values = []
             current_value = params.get('value').copy()

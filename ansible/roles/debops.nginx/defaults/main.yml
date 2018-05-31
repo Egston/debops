@@ -7,7 +7,7 @@
 # .. contents:: Sections
 #    :local:
 #
-# .. include:: includes/all.rst
+# .. include:: ../../../includes/global.rst
 
 
 # .. envvar:: nginx_allow [[[
@@ -128,6 +128,12 @@ nginx_user: 'www-data'
 nginx_www: '/srv/www'
 
                                                                    # ]]]
+# .. envvar:: nginx_public_dir_name [[[
+#
+# public folder foreach website
+# It cat be overwritten per servers
+nginx_public_dir_name: 'public'
+                                                                   # ]]]
 # .. envvar:: nginx_etc_path [[[
 #
 # Directory where :program:`nginx` configuration is stored.
@@ -215,7 +221,7 @@ nginx_http_auth_basic_name: 'nginx_http'
 #
 # List of HTTP Basic Auth accounts which need to login before accessing this
 # server. Passwords are generated automatically and stored in 'secret/'
-# directory (see debops.secret_ role). If this list empty, access is not
+# directory (see :ref:`debops.secret` role). If this list empty, access is not
 # restricted.
 nginx_http_auth_users: []
 
@@ -348,7 +354,7 @@ nginx_default_keepalive_timeout: 60
 # .. envvar:: nginx_pki [[[
 #
 # Enable or disable support for PKI/SSL/TLS in nginx.
-# Defaults to ``True`` if debops.pki_ is enabled on the remote host.
+# Defaults to ``True`` if :ref:`debops.pki` is enabled on the remote host.
 nginx_pki: '{{ ansible_local|d() and ansible_local.pki|d() and
                (ansible_local.pki.enabled|d() | bool) }}'
 
@@ -1062,5 +1068,9 @@ nginx_ssl_ciphers:
   # FIPS 140-2 compliant (https://en.wikipedia.org/wiki/FIPS_140-2)
   # https://community.qualys.com/thread/12182
   fips: 'FIPS@STRENGTH:!aNULL:!eNULL'
+
+  # This cipher set disables the 'ssl_ciphers' option in 'nginx' and the
+  # default set of SSL ciphers for a given platform will be used.
+  default: ''
                                                                    # ]]]
                                                                    # ]]]
