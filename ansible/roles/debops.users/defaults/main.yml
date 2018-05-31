@@ -133,6 +133,15 @@ users__admin_accounts: '{{ lookup("template", "lookup/users__admin_accounts.j2")
 users__dependent_accounts: []
 
                                                                    # ]]]
+# .. envvar:: users__combined_accounts [[[
+#
+# YAML list which combines the :command:`users` defined in other
+# variables. This variable is used in the Ansible tasks.
+users__combined_accounts: '{{ lookup("template",
+                         "lookup/users__combined_accounts.j2",
+                         convert_data=False) | from_yaml }}'
+                                                                   # ]]]
+
 # Management of user resources [[[
 # --------------------------------
 
