@@ -192,14 +192,8 @@ users__dependent_accounts: []
 #
 # This variable combines other group and account variables together and is used
 # in the role tasks and templates.
-users__combined_accounts: '{{ users__groups
-                              + users__group_groups
-                              + users__host_groups
-                              + users__dependent_groups
-                              + users__default_accounts
-                              + users__accounts
-                              + users__group_accounts
-                              + users__host_accounts
-                              + users__dependent_accounts }}'
+users__combined_accounts: '{{ lookup("template",
+                         "lookup/users__combined_accounts.j2",
+                         convert_data=False) | from_yaml }}'
                                                                    # ]]]
                                                                    # ]]]
