@@ -1,6 +1,5 @@
 # {{ ansible_managed }}
 # vim: foldmarker=[[[,]]]:foldmethod=marker
-{% import 'debops__tpl_macros.j2' as debops__tpl_macros with context %}
 {% import 'apache__tpl_macros.j2' as apache__tpl_macros with context %}
 
 {#
@@ -34,7 +33,7 @@ LogLevel {{ apache__log_level }}
 <IfModule ssl_module>
 {{ apache__tpl_macros.get_default_tls_directives(item.value|d({})) }}
 
-{% if debops__tpl_macros.get_openssl_version() is version_compare("0.9.8h", ">=") %}
+{% if apache__tpl_macros.get_openssl_version() is version_compare("0.9.8h", ">=") %}
 SSLStaplingCache {{ apache__ocsp_stapling_cache | quote }}
 SSLStaplingResponseMaxAge {{ apache__ocsp_stapling_response_max_age|string }}
 {%   if apache__ocsp_stapling_force_url %}
