@@ -1,0 +1,7 @@
+---
+
+- name: Restart motd
+  service:
+    name: 'motd'
+    state: 'restarted'
+  when: machine__enabled|bool
