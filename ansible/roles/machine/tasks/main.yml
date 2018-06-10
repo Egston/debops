@@ -80,7 +80,7 @@
     mode: '0755'
   when: machine__enabled|bool and ansible_distribution_release in [ 'jessie' ]
 
-- name: Fix issue with dynamic MOTD on older OS releases
+- name: Fix issue with dynamic MOTD on older OS releases with systemd
   template:
     src: 'etc/tmpfiles.d/motd-dynamic.conf.j2'
     dest: '/etc/tmpfiles.d/motd-dynamic.conf'
@@ -89,10 +89,33 @@
     mode: '0644'
   notify: [ 'Create temporary files' ]
   register: machine__register_tmpfiles
-  when: machine__enabled|bool and ansible_distribution_release in [ 'jessie' ]
+  when: machine__enabled|bool and ansible_distribution_release in [ 'jessie' ] and
+        ansible_service_mgr == 'systemd'
 
-- name: Create /run/motd.dynamic symlink
+- name: Create /run/motd.dynamic symlink on older OS release with systemd
   meta: 'flush_handlers'
+
+- name: Fix issue with dynamic MOTD on older OS releases without systemd
+  template:
+    src: 'etc/init.d/motd.j2'
+    dest: '/etc/init.d/motd'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  notify: [ 'Restart motd' ]
+  when: machine__enabled|bool and ansible_distribution_release in [ 'jessie' ] and
+        ansible_service_mgr != 'systemd'
+
+- name: Fix issue with dynamic MOTD on older OS releases without systemd
+  template:
+    src: 'etc/init.d/motd.j2'
+    dest: '/etc/init.d/motd'
+    owner: 'root'
+    group: 'root'
+    mode: '0755'
+  notify: [ 'Restart motd' ]
+  when: machine__enabled|bool and ansible_distribution_release in [ 'jessie' ] and
+        ansible_service_mgr != 'systemd'
 
 - name: Add/remove diversion of packaged MOTD scripts
   vars:
