@@ -22,6 +22,9 @@
     mode: '0440'
   when: sudo__enabled|bool and sudo__ldap_enabled|bool
 
+- name: DebOps pre_tasks hook
+  include: "{{ lookup('debops.debops.task_src', 'sudo/pre_main.yml') }}"
+
 - name: Install required packages
   environment:
     SUDO_FORCE_REMOVE: 'yes'
@@ -100,3 +103,6 @@
 
 - name: Update Ansible facts if they were modified
   meta: 'flush_handlers'
+
+- name: DebOps post_tasks hook
+  include: "{{ lookup('debops.debops.task_src', 'sudo/post_main.yml') }}"
