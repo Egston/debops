@@ -1,5 +1,8 @@
 ---
 
+- name: DebOps pre_tasks hook
+  include: "{{ lookup('task_src', 'machine/pre_main.yml') }}"
+
 - name: Install requested packages
   package:
     name: '{{ item }}'
@@ -176,3 +179,6 @@
 - name: Update Ansible facts if they were modified
   action: setup
   when: machine__register_facts is changed
+
+- name: DebOps post_tasks hook
+  include: "{{ lookup('task_src', 'machine/post_main.yml') }}"
