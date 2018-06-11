@@ -3,6 +3,9 @@
 - import_role:
     name: 'ansible_plugins'
 
+- name: DebOps pre_tasks hook
+  include: "{{ lookup('task_src', 'sudo/pre_main.yml') }}"
+
 - name: Configure access to LDAP directory
   template:
     src: 'etc/sudo-ldap.conf.j2'
@@ -84,3 +87,6 @@
   when: sudo__register_facts is changed or
         sudo__register_sudoers_removed is changed or
         sudo__register_sudoers_created is changed
+
+- name: DebOps post_tasks hook
+  include: "{{ lookup('task_src', 'sudo/post_main.yml') }}"
