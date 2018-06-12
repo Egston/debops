@@ -67,12 +67,19 @@ sudo__group_sudoers: []
 sudo__host_sudoers: []
 
                                                                    # ]]]
+# .. envvar:: sudo__dependent_sudoers [[[
+#
+# Configuration for other Ansible roles, for usage as a dependent role.
+sudo__dependent_sudoers: []
+
+                                                                   # ]]]
 # .. envvar:: sudo__combined_sudoers [[[
 #
 # The variable which combines all other ``sudoers`` configuration variables and
 # is used in the role tasks.
 sudo__combined_sudoers: '{{ sudo__sudoers
                             + sudo__group_sudoers
-                            + sudo__host_sudoers }}'
+                            + sudo__host_sudoers
+                            + sudo__dependent_sudoers }}'
                                                                    # ]]]
                                                                    # ]]]
