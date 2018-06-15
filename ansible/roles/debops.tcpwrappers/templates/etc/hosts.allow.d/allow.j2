@@ -1,5 +1,5 @@
 {% if item.comment|d() %}
-# {{ item.comment }}
+{{ item.comment | regex_replace('\n$','') | comment(prefix_count=0, postfix_count=0) }}
 {% endif %}
 {% if item.custom|d() %}
 {{ item.custom }}
