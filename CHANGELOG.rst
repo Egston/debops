@@ -64,6 +64,11 @@ Added
   ``ssl_ciphers`` option in the :command:`nginx` configuration and forces the
   server to use the defaults provided by the OS.
 
+- [debops.dhparam] The role will set up a :command:`systemd` timer to
+  regenerate Diffie-Hellman parameters periodically if it's available. The
+  timer will use random delay time, up to 12h, to help with mass DHparam
+  generation in multiple LXC containers/VMs.
+
 Changed
 ~~~~~~~
 
@@ -199,6 +204,12 @@ Removed
 - [debops.lxc] Remove custom LXC template support. The LXC containers can be
   created by the normal templates provided by the ``lxc`` package, and then
   configured using DebOps roles as usual.
+
+- [debops.postgresql_server] The tasks that modified the default ``template1``
+  database and its schema have been removed to make the PostgreSQL installation
+  more compatible with applications packaged in Debian that rely on the
+  PostgreSQL service. See the relevant commit for more details. Existing
+  installations shouldn't be affected.
 
 
 `debops v0.7.2`_ - 2018-03-28
