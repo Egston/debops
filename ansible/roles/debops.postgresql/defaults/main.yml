@@ -6,6 +6,8 @@
 
 # .. contents:: Sections
 #    :local:
+#
+# .. include:: ../../../includes/global.rst
 
 
 # PostgreSQL installation, packages [[[
@@ -89,8 +91,8 @@ postgresql__port: '5432'
 # locally, host will delegate the tasks to itself automatically.
 postgresql__delegate_to: '{{ postgresql__server
                              if (postgresql__server|d() and
-                                 (postgresql__server != "localhost" or not postgresql__server))
-                             else omit }}'
+                                 postgresql__server != "localhost")
+                             else inventory_hostname }}'
 
                                                                    # ]]]
 # .. envvar:: postgresql__password_hostname [[[

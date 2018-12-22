@@ -47,14 +47,20 @@
 
   roles:
 
+    - role: debops.apt
+      tags: [ 'role::apt', 'skip::apt' ]
+
     - role: debops.python
-      tags: [ 'role::python' ]
+      tags: [ 'role::python', 'skip::python' ]
+
+    - role: debops.netbase
+      tags: [ 'role::netbase', 'skip::netbase' ]
 
     - role: debops.sudo
-      tags: [ 'role::sudo', 'role::system_groups' ]
+      tags: [ 'role::sudo', 'skip::sudo', 'role::system_groups' ]
 
     - role: debops.system_groups
-      tags: [ 'role::system_groups' ]
+      tags: [ 'role::system_groups', 'skip::system_groups' ]
 
     - role: debops.bootstrap
-      tags: [ 'role::bootstrap' ]
+      tags: [ 'role::bootstrap', 'skip::bootstrap' ]

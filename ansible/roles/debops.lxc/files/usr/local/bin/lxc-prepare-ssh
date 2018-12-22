@@ -8,7 +8,14 @@ set -o nounset -o pipefail -o errexit
 
 readonly SCRIPT="$(basename "${0}")"
 readonly CONTAINER="${1:-}"
-readonly AUTHORIZED_KEYS="${2:-"${HOME}/.ssh/authorized_keys"}"
+
+if [ -n "${SUDO_USER:-}" ] ; then
+    readonly USER_HOME="$(getent passwd "${SUDO_USER}" | cut -d: -f6)"
+else
+    readonly USER_HOME="${HOME}"
+fi
+
+readonly AUTHORIZED_KEYS="${2:-"${USER_HOME}/.ssh/authorized_keys"}"
 
 container_exists () {
     local container
@@ -85,7 +92,13 @@ main () {
         if container_exists "${container}" ; then
             if ! container_is_running "${container}" ; then
                 printf "Container '%s' is not running, starting...\n" "${container}"
-                lxc-start -n "${container}" -d
+
+                if pidof systemd > /dev/null 2>&1 ; then
+                    systemctl enable "lxc@${container}.service"
+                    systemctl start "lxc@${container}.service"
+                else
+                    lxc-start -n "${container}" -d
+                fi
                 lxc-wait -n "${container}" -s RUNNING
             fi
             prepare_openssh "${container}"

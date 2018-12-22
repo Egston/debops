@@ -340,8 +340,10 @@
 
 {%     endif %}
 {%     if item.deny_hidden|d(True) | bool %}
-        # Disallow access to hidden files and directories
-        location ~ /\. {
+        # Disallow access to hidden files and directories, except `/.well-known/`
+        # https://www.mnot.net/blog/2010/04/07/well-known
+        # https://tools.ietf.org/html/rfc5785
+        location ~ /\.(?!well-known/) {
                 return 404;
         }
 
@@ -394,7 +396,7 @@
 {%         else                                            %}
         location / {
 {%             block nginx_tpl_block_location_root         %}
-                try_files {{ item.try_files|default(nginx_default_try_files) | join(' ') }} =404;
+                try_files {{ (([ item.try_files ] if item.try_files is string else item.try_files) if item.try_files|d() else nginx_default_try_files) | join(' ') }} =404;
 {%             endblock                                    %}
         }
 {%         endif                                           %}
