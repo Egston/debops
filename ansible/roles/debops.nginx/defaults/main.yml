@@ -59,6 +59,15 @@ nginx_base_packages: [ 'python-passlib' ]
 nginx_flavor: 'full'
 
                                                                    # ]]]
+# .. envvar:: nginx__flavor_distribution_release [[[
+#
+# Specify the OS distribution release to use in falvored repositories.
+nginx__flavor_distribution_release: '{{ ansible_local.core.distribution_release
+                                        if (ansible_local|d() and ansible_local.core|d() and
+                                            ansible_local.core.distribution_release|d())
+                                        else ansible_distribution_release }}'
+
+                                                                   # ]]]
 # .. envvar:: nginx__flavor_apt_key_id [[[
 #
 nginx__flavor_apt_key_id: '{{ nginx__flavor_apt_key_id_map[nginx_flavor]|d() }}'
@@ -79,8 +88,8 @@ nginx__flavor_apt_key_id_map:
 # .. envvar:: nginx__flavor_apt_repository_map [[[
 #
 nginx__flavor_apt_repository_map:
-  'nginx.org': 'deb https://nginx.org/packages/{{ ansible_distribution | lower }}/ {{ ansible_distribution_release }} nginx'
-  'passenger': 'deb https://oss-binaries.phusionpassenger.com/apt/passenger {{ ansible_distribution_release }} main'
+  'nginx.org': 'deb https://nginx.org/packages/{{ ansible_distribution | lower }}/ {{ nginx__flavor_distribution_release }} nginx'
+  'passenger': 'deb https://oss-binaries.phusionpassenger.com/apt/passenger {{ nginx__flavor_distribution_release }} main'
 
                                                                    # ]]]
 # .. envvar:: nginx__flavor_packages [[[
@@ -107,7 +116,7 @@ nginx_flavor_package_map:
     - 'nginx-extras'
     - 'ruby'
     - '{{ "passenger"
-          if (ansible_distribution_release in
+          if (nginx__flavor_distribution_release in
               [ "wheezy", "jessie", "precise", "trusty", "xenial" ])
           else "libnginx-mod-http-passenger" }}'
 
@@ -570,6 +579,23 @@ nginx_hsts_subdomains: True
 nginx_hsts_preload: False
 
                                                                    # ]]]
+# .. envvar:: nginx_enable_http2 [[[
+#
+# Enable HTTP/2 (formerly HTTP QUICK) on nginx.
+# HTTP/2 enables a server to pre‑emptively push resources to a remote client,
+# anticipating that the client may soon request those resource, hence
+# reducing the number of RTTs (Round Trip Times).
+# Available with nginx version >= 1.9.5
+nginx_enable_http2: True
+
+                                                                   # ]]]
+# .. envvar:: nginx_enable_sdpy [[[
+#
+# Enables experimental support for .. _SPDY: https://www.chromium.org/spdy/spdy-protocol HTTP protocol.
+# Available with nginx version >= 1.4 && < 1.9.5
+nginx_enable_sdpy: False
+
+                                                                   # ]]]
 # .. envvar:: nginx__http_csp_append [[[
 #
 # CSP directives to append to all policies. This can be used to set the
@@ -662,6 +688,17 @@ nginx_acme_server: False
 # server needs to be configured to answer the queries.
 # Set to ``False`` to disable the redirect.
 nginx_acme_domain: 'acme.{{ ansible_domain }}'
+
+                                                                   # ]]]
+# .. envvar:: nginx__hostname_domains [[[
+#
+# Specify the domains which will be used as a base domains for automatic short
+# name generation. It will not be used if it's defined on the server level.
+# First domain from the list that matches, wins.
+nginx__hostname_domains: [ '{{ ansible_local.core.domain
+                               if (ansible_local|d() and ansible_local.core|d() and
+                                   ansible_local.core.domain|d())
+                               else (ansible_domain if ansible_domain else ansible_hostname) }}' ]
 
                                                                    # ]]]
 # .. envvar:: nginx_status [[[
@@ -805,6 +842,12 @@ nginx__maps: []
 #
 # List of default nginx map definitions
 nginx__default_maps:
+
+  # Extract the subdomain from the '*.local' domain managed by Avahi and expose
+  # it as a variable which can be used to redirect the HTTP clients to websites
+  - name: 'host_without_local'
+    map: '$host $host_without_local'
+    mapping: '~*^(?<subdomain>[a-zA-Z0-9\-\_\.]+)\.local$ $subdomain;'
 
   # Support WebSocket connection upgrade as a proxy
   # Documentation: https://nginx.org/en/docs/http/websocket.html

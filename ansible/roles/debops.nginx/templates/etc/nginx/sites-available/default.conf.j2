@@ -436,6 +436,68 @@
 {%     endif                                                                %}
 
 {% endif                                                                    %}
+{% set nginx__tpl_hostname_domain = item.hostname_domain | d((item.name if item.name is string else item.name[0]).split('.')[1:] | join('.')) %}
+{% set nginx__tpl_final_hostname_domain = [] %}
+{% if item.hostname_domain is undefined %}
+{%   for domain_suffix in nginx__hostname_domains[::-1] %}
+{%     if nginx__tpl_hostname_domain.endswith(domain_suffix) %}
+{%       if nginx__tpl_final_hostname_domain %}
+{%         set _ = nginx__tpl_final_hostname_domain.pop() %}
+{%       endif %}
+{%       set _ = nginx__tpl_final_hostname_domain.append(domain_suffix) %}
+{%     endif %}
+{%   endfor %}
+{%   if nginx__tpl_final_hostname_domain %}
+{%     set nginx__tpl_hostname_domain = nginx__tpl_final_hostname_domain[0] %}
+{%   endif %}
+{% endif %}
+{% if item.hostname is undefined                         %}
+{%   set nginx__tpl_hostnames = []                       %}
+{%   for element in ([ item.name ] if (item.name is string) else item.name) %}
+{%     set element_hostname = element | regex_replace(('\.' + (nginx__tpl_hostname_domain | replace('.', '\.')) + '$'), '') %}
+{%     if (not element_hostname | ipaddr and
+           element_hostname not in ([ item.name ] if (item.name is string) else item.name) and
+           not element_hostname.startswith('www') and
+           element_hostname is not search('[^a-zA-Z0-9\-\_\.]+')) and
+           (element_hostname + '.' + nginx__tpl_hostname_domain) in ([ item.name ] if item.name is string else item.name) %}
+{%       set _ = nginx__tpl_hostnames.append(element_hostname) %}
+{%     endif %}
+{%   endfor %}
+{% else %}
+{%   set nginx__tpl_hostnames = ([ item.hostname ] if (item.hostname is string) else item.hostname) %}
+{% endif %}
+{% if nginx__tpl_hostnames|d() and item.listen|d(True)                  %}
+# Support for redirection via DNS suffixes in /etc/resolv.conf
+server {
+{%   if item.listen|d(True)                            %}
+{%       for port in nginx_tpl_listen                  %}
+        listen {{ port }};
+{%       endfor                                        %}
+
+{%       for address in nginx__tpl_hostnames | unique %}
+        server_name {{ address }};
+{%       endfor                                        %}
+
+{%   endif                                             %}
+        return {{ item.redirect_code | default(nginx_tpl_default_redirect_code) }} $scheme://$host.{{ nginx__tpl_hostname_domain }}$request_uri;
+}
+
+# Support for redirection via Avahi/mDNS '*.local' domain
+server {
+{%   if item.listen|d(True)                            %}
+{%       for port in nginx_tpl_listen                  %}
+        listen {{ port }};
+{%       endfor                                        %}
+
+{%       for address in nginx__tpl_hostnames | unique %}
+        server_name {{ address }}.local;
+{%       endfor                                        %}
+
+{%   endif                                             %}
+        return {{ item.redirect_code | default(nginx_tpl_default_redirect_code) }} $scheme://$host_without_local.{{ nginx__tpl_hostname_domain }}$request_uri;
+}
+
+{% endif                                                 %}
 {% if item.redirect_from|d() and item.name|d()           %}
 {%     if item.name is string or item.name | length == 1 %}
 # Cannot redirect from only one name: {{ item.name if item.name is string else item.name | join(', ') }}
@@ -535,7 +597,7 @@ server {
 
 {%     endif                                                %}
 {%     for port in nginx_tpl_listen_ssl                     %}
-        listen {{ port }} ssl{% if nginx_version is version_compare('1.9.5','>=') %} http2{% elif nginx_version is version_compare('1.4','>=') %} spdy{% endif %}{% if nginx_tpl_default_server_ssl %} {{ nginx_tpl_default_server_ssl | join(" ") }}{% endif %}{% if (loop.first and nginx_tpl_ipv6only_ssl) %} {{ nginx_tpl_ipv6only_ssl | join(" ") }}{% endif %};
+        listen {{ port }} ssl{% if nginx_version is version_compare('1.9.5','>=') and nginx_enable_http2|bool %} http2{% elif nginx_version is version_compare('1.4','>=') and nginx_enable_sdpy|bool %} spdy{% endif %}{% if nginx_tpl_default_server_ssl %} {{ nginx_tpl_default_server_ssl | join(" ") }}{% endif %}{% if (loop.first and nginx_tpl_ipv6only_ssl) %} {{ nginx_tpl_ipv6only_ssl | join(" ") }}{% endif %};
 {%     endfor                                               %}
 
         ssl_certificate           {{ nginx_tpl_ssl_certificate }};

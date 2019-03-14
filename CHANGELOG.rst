@@ -3,8 +3,8 @@
 Changelog
 =========
 
-This project adheres to `Semantic Versioning <http://semver.org/spec/v2.0.0.html>`__
-and `human-readable changelog <http://keepachangelog.com/en/1.0.0/>`__.
+This project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`__
+and `human-readable changelog <https://keepachangelog.com/en/1.0.0/>`__.
 
 This file contains only general overview of the changes in the DebOps project.
 The detailed changelog can be seen using :command:`git log` command.
@@ -16,7 +16,123 @@ You can read information about required changes between releases in the
 `debops master`_ - unreleased
 -----------------------------
 
-.. _debops master: https://github.com/debops/debops/compare/v0.8.0...master
+.. _debops master: https://github.com/debops/debops/compare/v0.8.1...master
+
+Added
+~~~~~
+
+- New DebOps roles:
+
+  - :ref:`debops.docker_registry` role provides support for Docker Registry.
+    The role can be used as standalone or as a backend for the GitLab Container
+    Registry service, with :ref:`debops.gitlab` role.
+
+- [debops.nginx] The role will automatically generate configuration which
+  redirects short hostnames or subdomains to their FQDN equivalents. This
+  allows HTTP clients to reach websites by specifying their short names via DNS
+  suffixes from :file:`/etc/resolv.conf` file, or using ``*.local`` domain
+  names managed by Avahi/mDNS to redirect HTTP clients to the correct FQDNs.
+
+- [debops.resources] Some lists can now configure ACL entries on the destination
+  files or directories using the ``item.acl`` parameter. Take a look to
+  :ref:`resources__ref_acl` section to have the list of compatibles variables.
+
+- [debops.lxc] Users can now disable default route advertisement in the
+  ``lxc-net`` DHCP service. This is useful in cases where LXC containers have
+  multiple network interfaces and the default route should go through
+  a different gateway than the LXC host.
+
+- [debops.lxc] The :command:`lxc-new-unprivileged` script will add missing
+  network interface stanzas in the container's :file:`/etc/network/interfaces`
+  file, by default with DHCP configuration. This will happen only on the
+  initialization of the new container, when a given LXC container has multiple
+  network interfaces defined in its configuration file.
+
+Changed
+~~~~~~~
+
+- Updates of upstream application versions:
+
+  - [debops.gitlab] The role will install GitLab 11.7 on supported platforms
+    (Debian Buster, Ubuntu Bionic), existing installations will be upgraded.
+
+  - [debops.phpipam] The relevant inventory variables have been renamed, check
+    the :ref:`upgrade_notes` for details. The role now uses the upstream
+    phpIPAM repository and it installs version 1.3.2.
+
+  - [debops.php] Because of the PHP 7.0 release status changed to `End of life`__
+    at the beginning of 2019, Ondřej Surý APT repository with PHP 7.2 packages
+    will be enabled by default on Debian Jessie and Stretch as well as Ubuntu
+    Trusty and Xenial. Existing :ref:`debops.php` installations shouldn't be
+    affected, but the role will not try to upgrade the PHP version either.
+    Users should consider upgrading the packages manually or reinstalling
+    services from scratch with the newer version used by default.
+
+    .. __: https://secure.php.net/supported-versions.php
+
+- [debops.lxc] The :command:`lxc-prepare-ssh` script will read the public SSH
+  keys from specific files (``root`` key file, and the ``$SUDO_USER`` key file)
+  and will not accept any custom files to read from, to avoid possible security
+  issues. Each public SSH key listed in the key files is validated before being
+  added to the container's ``root`` account.
+
+  The :command:`lxc-new-unprivileged` script will similarly not accept any
+  custom files as initial LXC container configuration to fix any potential
+  security holes when used via :command:`sudo`. The default LXC configuration
+  file used by the script can be configured in :file:`/etc/lxc/lxc.conf`
+  configuration file.
+
+- [debops.gitlab] The GitLab playbook will import the
+  :ref:`debops.docker_registry` playbook to ensure that configuration related
+  to Docker Registry defined in the GitLab service is properly applied during
+  installation/management.
+
+- [debops.php] The PHP version detection has been redesigned to use the
+  :command:`apt-cache madison` command to find the available versions. The role
+  will now check the current version of the ``php`` APT package to select the
+  available stable PHP version. This unfortunately breaks support for the
+  ``php5`` packages, but the ``php5.6`` packages from Ondřej Surý APT
+  repository work fine.
+
+- [debops.mariadb_server] The MariaDB user ``root`` is no longer dropped. This
+  user is used for database maintenance and authenticates using the
+  ``unix_auth`` plugin. However, DebOps still maintains and sets a password for
+  the ``root`` UNIX account, stored in the :file:`/root/.my.cnf` config file.
+
+- The :ref:`debops.cron` role will be applied much earlier in the
+  ``common.yml`` playbook because the :ref:`debops.pki` role depends on
+  presence of the :command:`cron` daemon on the host.
+
+- [debops.netbase] The role will be disabled by default in Docker containers.
+  In this environment, the :file:`/etc/hosts` file is managed by Docker and
+  cannot be modified from inside of the container.
+
+Fixed
+~~~~~
+
+- [debops.redis_server] Use the :file:`redis.conf` file to lookup passwords via
+  the :command:`redis-password` script. This file has the ``redis-auth`` UNIX
+  group and any accounts in this group should now be able to look up the Redis
+  passwords correctly.
+
+- [debops.slapd] The role will check if the X.509 certificate and the private
+  key used for TLS communication were correctly configured in the OpenLDAP
+  server. This fixes an issue where configuration of the private key and
+  certificate was not performed at all, without any actual changes in the
+  service, with subsequent task exiting with an error due to misconfiguration.
+
+- [debops.lvm] Make sure a file system is created by default when the ``mount``
+  parameter is defined in the :envvar:`lvm__logical_volumes`.
+
+- [debops.lvm] Stop and disable ``lvm2-lvmetad.socket`` systemd unit when
+  disabling :envvar:`lvm__global_use_lvmetad` to avoid warning message when
+  invoking LVM commands.
+
+
+`debops v0.8.1`_ - 2019-02-02
+-----------------------------
+
+.. _debops v0.8.1: https://github.com/debops/debops/compare/v0.8.0...v0.8.1
 
 Added
 ~~~~~
@@ -46,6 +162,10 @@ Added
   subordinate UIDs/GIDs owned by the ``root`` account (they are not reserved by
   default). This can be used to create unprivileged LXC containers owned by
   ``root``. See the release notes for potential issues on existing systems.
+
+- [debops.root_account] You can now configure the state and contents of the
+  :file:`/root/.ssh/authorized_keys` file using the :ref:`debops.root_account`
+  role, with support for global, per inventory group and per host SSH keys.
 
 - DebOps roles are now tagged with ``skip::<role_name>`` Ansible tags. You can
   use these tags to skip roles without any side-effects; for example
@@ -92,6 +212,26 @@ Added
 - [debops.netbase] The role can now configure the hostname in the
   :file:`/etc/hostname` file, as well as the local domain configuration in
   :file:`/etc/hosts` database.
+
+- Ansible roles included in DebOps are now checked using `ansible-lint`__ tool.
+  All existing issues found by the script have been fixed.
+
+  .. __: https://docs.ansible.com/ansible-lint/
+
+- The hosts managed by the DebOps Vagrant environment will now use Avahi to
+  detect multiple cluster nodes and generate host records in the
+  :file:`/etc/hosts` database on these nodes. This allows usage of real DNS
+  FQDNs and hostnames in the test environment without reliance on an external
+  DHCP/DNS services.
+
+- [debops.php] The role will install the ``composer`` APT package on Debian
+  Stretch, Ubuntu Xenial and their respective newer OS releases.
+
+- You can use the :command:`make versions` command in the root of the DebOps
+  monorepo to check currently "pinned" and upstream versions of third-party
+  software installed and managed by DebOps, usually via :command:`git`
+  repositories. This requires the :command:`uscan` command from the Debian
+  ``devscripts`` APT package to be present.
 
 Changed
 ~~~~~~~
@@ -180,11 +320,6 @@ Changed
   This is done to solve the connectivity issues with ``cdimage.debian.org``
   host.
 
-- [debops.ipxe] The role will install the original release of the
-  ``netboot.tar.gz`` Debian Installer image instead of the current release,
-  which seems to be broken at the moment. New default variable is added to
-  allow selection of the image version.
-
 - The hostname and domain configuration during bootstrapping is now done by the
   :ref:`debops.netbase` Ansible role. The default for this role is to remove
   the ``127.0.1.1`` host entry from the :file:`/etc/hosts` file to ensure that
@@ -206,10 +341,23 @@ Changed
   Read the documentation about :ref:`resources__ref_templates` for more details
   on templating with `debops`.
 
-- [debops.dnsmasq] The role has been redesigned from the groun up with new
+- [debops.dnsmasq] The role has been redesigned from the ground up with new
   configuration pipeline, support for multiple subdomains and better default
   configuration. See the :ref:`debops.dnsmasq` role documentation as well as
   the :ref:`upgrade_notes` for more details.
+
+- [debops.owncloud] Drop support for Nextcloud 12.0 which is EOF. Add support
+  for Nextcloud 14.0 and 15.0 and make Nextcloud 14.0 the default Nextcloud
+  version.
+
+- The ``debops`` Python package has dropped the hard dependency on Ansible.
+  This allows DebOps to be installed in a separate environment than Ansible,
+  allowing for example to mix Homebrew Ansible with DebOps from PyPI on macOS.
+  The installation instructions have also been updated to reflect the change.
+
+- The :command:`debops-init` script will now generate new Ansible inventory
+  files using the hostname as well as a host FQDN to better promote the use of
+  DNS records in Ansible inventory.
 
 Fixed
 ~~~~~

@@ -48,7 +48,7 @@ owncloud__base_packages:
 # .. envvar:: owncloud__required_php_packages
 #
 # List of PHP packages required by Nextcloud.
-# Refer to the `official Nextcloud documentation <https://docs.nextcloud.com/server/11/admin_manual/installation/source_installation.html>`__ for details.
+# Refer to the `official Nextcloud documentation <https://docs.nextcloud.com/server/stable/admin_manual/installation/source_installation.html#prerequisites-for-manual-installation>`__ for details.
 owncloud__required_php_packages:
   # Included in base install:
   # - 'ctype'
@@ -71,7 +71,7 @@ owncloud__required_php_packages:
 # .. envvar:: owncloud__recommended_php_packages
 #
 # List of PHP packages recommended by Nextcloud.
-# Refer to the `official Nextcloud documentation <https://docs.nextcloud.com/server/11/admin_manual/installation/source_installation.html>`__ for details.
+# Refer to the `official Nextcloud documentation <https://docs.nextcloud.com/server/stable/admin_manual/installation/source_installation.html#prerequisites-for-manual-installation>`__ for details.
 owncloud__recommended_php_packages:
   - 'curl'
   - 'bz2'
@@ -92,11 +92,14 @@ owncloud__base_php_packages:
   - 'mbstring'
   - 'zip'
 
+  ## Required for the "OpenOTP Two Factor Authentication" (twofactor_rcdevsopenotp) as of NC 14.
+  - 'ldap'
+  - 'soap'
+
   - '{{ [ "apcu" ] if (owncloud__apcu_enabled|bool) else [] }}'
   - '{{ [ "mysql" ] if (owncloud__database in [ "mariadb", "mysql" ]) else [] }}'
   - '{{ [ "pgsql" ] if (owncloud__database in [ "postgresql" ]) else [] }}'
   - '{{ [ "redis" ] if (owncloud__redis_enabled | bool) else [] }}'
-  - '{{ [ "ldap" ] if (owncloud__ldap_enabled | bool) else [] }}'
 
   ## Seems to be required at least for PHP7.0 to fix:
   ## PHP Warning: PHP Startup: Unable to load dynamic library '/usr/lib/php/20151012/redis.so'
@@ -176,8 +179,8 @@ owncloud__deploy_state: 'present'
 
 # .. envvar:: owncloud__system_user [[[
 #
-# Name of the system account which will perform signature and archive
-# verification.
+# Name of the system account which will perform archive
+# verification using the OpenPGP signature.
 owncloud__system_user: 'nextcloud'
 
                                                                    # ]]]
@@ -286,14 +289,15 @@ owncloud__dpkg_hook_script: '{{
 # .. envvar:: owncloud__auto_database_upgrade_migration_test
 #
 # Whether database schema migration should be simulated before upgrading the production database.
-# Refer to the `official ownCloud documentation <https://doc.owncloud.org/server/9.0/admin_manual/maintenance/package_upgrade.html#migration-test>`__ for details.
+# For Nextcloud it cannot be configured and this variable is ignored.
+# Refer to the `official ownCloud documentation <https://doc.owncloud.org/server/9.0/admin_manual/maintenance/upgrade.html#migration-test>`__ for details.
 owncloud__auto_database_upgrade_migration_test: True
 
 
 # .. envvar:: owncloud__auto_database_upgrade_3party_app_disable
 #
 # Should third party apps by disabled during/after upgrades? The upstream default as of ownCloud 9.0
-# is ``True``.
+# is ``True``. For Nextcloud it cannot be configured and this variable is ignored.
 owncloud__auto_database_upgrade_3party_app_disable: True
 
 
@@ -413,8 +417,9 @@ owncloud__variant_name_map:
 #
 # * ownCloud ``10.0``
 #
-# * Nextcloud ``12.0``
 # * Nextcloud ``13.0``
+# * Nextcloud ``14.0``
+# * Nextcloud ``15.0``
 #
 # For Nextcloud refer to the `Nextcloud Maintenance and Release Schedule <https://github.com/nextcloud/server/wiki/Maintenance-and-Release-Schedule>`_.
 # and the `Nextcloud Server Changelog <https://nextcloud.com/changelog/>`_.
@@ -423,7 +428,7 @@ owncloud__variant_name_map:
 # and the `package index <https://download.owncloud.org/download/repositories/>`_ for more details.
 owncloud__release: '{{ "10.0"
                        if (owncloud__variant == "owncloud")
-                       else "12.0" }}'
+                       else "14.0" }}'
 
 
 # .. envvar:: owncloud__distribution
@@ -2013,7 +2018,7 @@ owncloud__nginx__dependent_servers:
           access_log off;
           {% endif %}
 
-      - pattern: '~* \.(?:svg|gif|png|html|ttf|woff|ico|jpg|jpeg)$'
+      - pattern: '~* \.(?:svg|gif|png|html|ttf|woff2?|ico|jpg|jpeg)$'
         options: |
           try_files $uri /index.php$uri$is_args$args;
 

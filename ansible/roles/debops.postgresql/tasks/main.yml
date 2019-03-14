@@ -8,6 +8,8 @@
                    if (ansible_local|d() and ansible_local.core|d() and
                        ansible_local.core.keyserver)
                    else "hkp://pool.sks-keyservers.net" }}'
+  register: postgresql__register_apt_key
+  until: postgresql__register_apt_key is succeeded
   when: postgresql__upstream|bool
 
 - name: Add upstream PostgreSQL APT repository
@@ -20,7 +22,10 @@
 - name: Get default PostgreSQL version
   environment:
     LC_ALL: 'C'
-  shell: "apt-cache policy postgresql-client | grep -E '^\\s+Candidate:\\s+' | awk '{print $2}' | cut -d+ -f1"
+  shell: "set -o nounset -o pipefail -o errexit &&
+          apt-cache policy postgresql-client | grep -E '^\\s+Candidate:\\s+' | awk '{print $2}' | cut -d+ -f1"
+  args:
+    executable: '/bin/bash'
   register: postgresql__register_version
   changed_when: False
 
@@ -42,11 +47,16 @@
     - '{{ postgresql__base_packages }}'
     - '{{ postgresql__python_packages }}'
     - '{{ postgresql__packages }}'
+  register: postgresql__register_packages
+  until: postgresql__register_packages is succeeded
 
 - name: Check if database server is installed
   environment:
     LC_MESSAGES: 'C'
-  shell: dpkg-query -W -f='${Version}\n' 'postgresql' | grep -v '^$'
+  shell: set -o nounset -o pipefail -o errexit &&
+         dpkg-query -W -f='${Version}\n' 'postgresql' | grep -v '^$'
+  args:
+    executable: '/bin/bash'
   register: postgresql__register_server
   changed_when: False
   failed_when: False
@@ -98,6 +108,7 @@
     - '{{ postgresql__roles }}'
     - '{{ postgresql_roles|d([]) }}'
     - '{{ postgresql__dependent_roles }}'
+  become: True
   become_user: '{{ postgresql__user }}'
   delegate_to: '{{ postgresql__delegate_to }}'
   when: (((item.name|d() and item.name) or (item.role|d() and item.role)) and
@@ -118,6 +129,7 @@
     - '{{ postgresql__databases }}'
     - '{{ postgresql_databases|d([]) }}'
     - '{{ postgresql__dependent_databases }}'
+  become: True
   become_user: '{{ postgresql__user }}'
   delegate_to: '{{ postgresql__delegate_to }}'
   when: (((item.name|d() and item.name) or (item.database|d() and item.database)) and
@@ -133,6 +145,7 @@
   with_flattened:
     - '{{ postgresql__extensions }}'
     - '{{ postgresql__dependent_extensions }}'
+  become: True
   become_user: '{{ postgresql__user }}'
   delegate_to: '{{ postgresql__delegate_to }}'
   when: (item.extension|d() and item.database|d())
@@ -151,6 +164,7 @@
     - '{{ postgresql__databases }}'
     - '{{ postgresql_databases|d([]) }}'
     - '{{ postgresql__dependent_databases }}'
+  become: True
   become_user: '{{ postgresql__user }}'
   delegate_to: '{{ postgresql__delegate_to }}'
   when: (((item.name|d() and item.name) or (item.database|d() and item.database)) and
@@ -170,6 +184,7 @@
     - '{{ postgresql__groups }}'
     - '{{ postgresql_groups|d([]) }}'
     - '{{ postgresql__dependent_groups }}'
+  become: True
   become_user: '{{ postgresql__user }}'
   delegate_to: '{{ postgresql__delegate_to }}'
   when: ((item.roles|d() and item.roles) and
@@ -188,6 +203,7 @@
     - '{{ postgresql__roles }}'
     - '{{ postgresql_roles|d([]) }}'
     - '{{ postgresql__dependent_roles }}'
+  become: True
   become_user: '{{ postgresql__user }}'
   delegate_to: '{{ postgresql__delegate_to }}'
   when: (((item.name|d() and item.name) or (item.role|d() and item.role)) and
@@ -226,7 +242,8 @@
   lineinfile:
     dest: '{{ "~" + item.owner }}/.pgpass'
     regexp: '{{ "^" + ([
-                        ((item.server  | d(postgresql__server if postgresql__server else "localhost")) | replace(".","\.")),
+                        ((item.server  | d(postgresql__server if postgresql__server else "localhost"))
+                         | replace(".","\.")),
                         (item.port     | d(postgresql__port)),
                         (item.database | d("\*")),
                         (item.name     | d(item.role | d(item.owner | d("\*"))))

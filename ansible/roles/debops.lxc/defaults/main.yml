@@ -104,6 +104,15 @@ lxc__net_bridge: 'lxcbr0'
 lxc__net_address: '10.0.3.1/24'
 
                                                                    # ]]]
+# .. envvar:: lxc__net_router [[[
+#
+# Enable or disable router advertisement on the ``lxc-net`` bridge. You should
+# disable this if the primary network route of the LXC containers should go
+# through normal host bridges instead of the bridge managed by the ``lxc-net``
+# service.
+lxc__net_router: True
+
+                                                                   # ]]]
 # .. envvar:: lxc__net_dhcp_start [[[
 #
 # The index of the IP address from the above subnet that starts the DHCP range.
@@ -130,10 +139,16 @@ lxc__net_dhcp_end: '-2'
 # domain in the :file:`/etc/resolv.conf`; with local DNS resolver, for example
 # :command:`dnsmasq`, configured on the LXC host the containers can then be
 # accessed by their hostnames instead of the IP addresses.
-lxc__net_domain: 'lxc.{{ ansible_local.core.domain
-                         if (ansible_local|d() and ansible_local.core|d() and
-                             ansible_local.core.domain|d())
-                         else (ansible_domain if ansible_domain else ansible_hostname) }}'
+lxc__net_domain: '{{ ansible_local.lxc.net_domain
+                     if (ansible_local|d() and ansible_local.lxc|d() and
+                         ansible_local.lxc.net_domain|d())
+                     else ("lxc." + (ansible_local.core.domain
+                                     if (ansible_local|d() and
+                                         ansible_local.core|d() and
+                                         ansible_local.core.domain|d())
+                                     else (ansible_domain
+                                           if ansible_domain
+                                           else ansible_hostname))) }}'
 
                                                                    # ]]]
 # .. envvar:: lxc__net_interface_fqdn [[[
@@ -186,6 +201,12 @@ lxc__default_configuration:
           specified otherwise
         value: '/etc/lxc/privileged.conf'
 
+      - name: 'lxc.default_unprivileged_config'
+        comment: |
+          Default configuration file used for new unprivileged LXC containers,
+          created by the 'lxc-new-unprivileged' script
+        value: '/etc/lxc/internal-unprivileged.conf'
+
     # Default configuration for unprivileged LXC containers.
   - name: 'unprivileged'
     options:
@@ -194,7 +215,12 @@ lxc__default_configuration:
         value: 'veth'
 
       - name: 'lxc.network.link'
-        value: '{{ "lxcbr0" if (lxc__net_deploy_state == "present") else "br0" }}'
+        value: '{{ "br0"
+                   if (ansible_local|d() and ansible_local.ifupdown|d() and
+                       (ansible_local.ifupdown.configured|d())|bool)
+                   else (lxc__net_bridge
+                         if (lxc__net_deploy_state == "present")
+                         else "br0") }}'
 
       - name: 'lxc.network.flags'
         value: 'up'
@@ -242,7 +268,12 @@ lxc__default_configuration:
         value: 'veth'
 
       - name: 'lxc.network.link'
-        value: '{{ "lxcbr0" if (lxc__net_deploy_state == "present") else "br0" }}'
+        value: '{{ "br0"
+                   if (ansible_local|d() and ansible_local.ifupdown|d() and
+                       (ansible_local.ifupdown.configured|d())|bool)
+                   else (lxc__net_bridge
+                         if (lxc__net_deploy_state == "present")
+                         else "br0") }}'
 
       - name: 'lxc.network.flags'
         value: 'up'
@@ -255,6 +286,56 @@ lxc__default_configuration:
         alias: 'lxc.cap.drop'
         value: 'mknod sys_rawio syslog wake_alarm'
 
+    # Configuration for unprivileged LXC containers that uses only the internal
+    # bridge managed by the 'lxc-net' service
+  - name: 'internal-unprivileged'
+    state: '{{ "present" if (lxc__net_deploy_state == "present") else "absent" }}'
+    options:
+
+      - name: 'lxc.network.type'
+        value: 'veth'
+
+      - name: 'lxc.network.link'
+        value: '{{ lxc__net_bridge }}'
+
+      - name: 'lxc.network.flags'
+        value: 'up'
+
+      - name: 'lxc.id_map_user'
+        alias: 'lxc.id_map'
+        value: 'u 0 {{ lxc__root_subuid_start }} {{ lxc__root_subuid_count }}'
+        separator: True
+
+      - name: 'lxc.id_map_group'
+        alias: 'lxc.id_map'
+        value: 'g 0 {{ lxc__root_subgid_start }} {{ lxc__root_subgid_count }}'
+
+      - name: 'lxc.start.auto'
+        value: '0'
+        separator: True
+
+      - name: 'lxc.cap.drop_secure'
+        alias: 'lxc.cap.drop'
+        value: 'mknod sys_rawio syslog wake_alarm'
+
+      # Select how many CPUs are available inside of the container
+      - name: 'lxc.cgroup.cpuset.cpus'
+        value: '0-{{ ansible_processor_vcpus|int - 1 }}'
+        state: 'comment'
+        separator: True
+
+      # Limit the amount of memory available inside of the container
+      - name: 'lxc.cgroup.memory.limit_in_bytes'
+        value: '{{ (ansible_memtotal_mb|int / 1024) | round | int }}G'
+        state: 'comment'
+
+      # Limit available swap space inside of the container. The value is
+      # a combined memory (above) + swap size, it should be bigger than the
+      # amount of memory allocated to the container.
+      - name: 'lxc.cgroup.memory.memsw.limit_in_bytes'
+        value: '{{ ((ansible_memtotal_mb|int + ansible_swaptotal_mb|int) / 1024) | round | int }}G'
+        state: 'comment'
+
     # Default configuration for privileged LXC containers with multiple network
     # interfaces
   - name: 'external-internal'
@@ -266,7 +347,12 @@ lxc__default_configuration:
 
       - name: 'lxc.network.link_net0'
         alias: 'lxc.network.link'
-        value: '{{ "lxcbr0" if (lxc__net_deploy_state == "present") else "br0" }}'
+        value: '{{ "br0"
+                   if (ansible_local|d() and ansible_local.ifupdown|d() and
+                       (ansible_local.ifupdown.configured|d())|bool)
+                   else (lxc__net_bridge
+                         if (lxc__net_deploy_state == "present")
+                         else "br0") }}'
 
       - name: 'lxc.network.flags_net0'
         alias: 'lxc.network.flags'

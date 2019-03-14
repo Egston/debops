@@ -7,6 +7,8 @@
   with_flattened:
     - '{{ redis_sentinel__base_packages }}'
     - '{{ redis_sentinel__packages }}'
+  register: redis_sentinel__register_packages
+  until: redis_sentinel__register_packages is succeeded
 
 - name: Ensure that standalone Redis Sentinel is stopped on install
   systemd:
@@ -149,10 +151,10 @@
 - name: Reload systemd configuration when needed
   systemd:
     daemon_reload: True
-  when: ansible_service_mgr == 'systemd' and
-        redis_sentinel__register_systemd is changed or
-        redis_sentinel__register_systemd_remove is changed or
-        redis_sentinel__register_systemd_override is changed
+  when: (ansible_service_mgr == 'systemd' and
+         (redis_sentinel__register_systemd is changed or
+          redis_sentinel__register_systemd_remove is changed or
+          redis_sentinel__register_systemd_override is changed))
 
 - name: Ensure that Redis Sentinel instances are started
   systemd:

@@ -45,6 +45,46 @@ Common role options
   configurations for the same ``item.name``. For example separate
   configuration for HTTP and HTTPS.
 
+``hostname``
+  Optional. String or a list of hostnames or subdomain names without dots. If
+  it's defined, the role will generate ``server { }`` blocks that support
+  redirecting the short hostnames or subdomains in the ``*.local`` domain
+  managed by Avahi/mDNS to their corresponding FQDNs. For example:
+
+  - ``host/`` -> ``host.example.com``
+  - ``host.local`` -> ``host.example.com``
+
+  The ``example.com`` domain will be based on the ``hostname_domain``
+  parameter, or if not specified on the first value of the ``name`` parameter.
+  Users can use the short hostnames in browsers by appending ``/`` character
+  after the short name. Specifying directories or arguments is also supported.
+
+  This allows the :command:`nginx` webserver to correctly handle short
+  subdomains passed to it via DNS suffixes defined in :file:`/etc/resolv.conf`,
+  or subdomains reachable via Avahi ``*.local`` domain.
+
+  If the ``hostname`` parameter is not specified, the role will automatically
+  generate subdomains based on the value of the ``name`` parameter; only
+  alphanumeric subdomains with optional dashes and underscores are supported in
+  this mode. To tell the role to not autogenerate the redirection, set the
+  ``hostname`` parameter to ``False``.
+
+``hostname_domain``
+  Optional. Specify the base DNS domain to use for short hostnames and
+  subdomains. You can use this to set the base domain in multi-subdomain
+  environments. For example, setting it to ``example.com`` will result in
+  redirects:
+
+  - ``host/`` -> ``host.example.com``
+  - ``sub.host/`` -> ``sub.host.example.com``
+
+  Supporting more than one level of subdomains with DNS suffixes on the clients
+  depends on the :man:`resolv.conf(5)` configuration, the ``ndots`` parameter.
+
+  If this parameter is not specified, the role will check the list in the
+  :envvar:`nginx__hostname_domains` for possible domain suffixes and use the
+  first one found there that matches the current server subdomain.
+
 ``enabled``
   Optional, boolean. Defaults to ``True``.
   Specifies if the configuration should be enabled by creating a symlink in
@@ -652,7 +692,7 @@ User directories
 
 ``userdir``
   Optional, boolean. Enable UserDir support.
-  Web pages on https://host/~<user>/ will be read from
+  Web pages on :file:`https://host/~<user>/` will be read from
   :file:`/srv/www/<user>/userdir/public` directories.
 
 ``userdir_regexp``

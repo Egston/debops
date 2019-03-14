@@ -32,7 +32,7 @@ etc.
 - :ref:`debops.owncloud`
 - :ref:`debops.prosody`
 - :ref:`debops.rstudio_server`
-- ``debops.phpipam``
+- :ref:`debops.phpipam`
 - ``debops.phpmyadmin``
 - ``debops-contrib.foodsoft``
 - ``debops-contrib.homeassistant``
@@ -296,6 +296,7 @@ Virtualization
 
 - :ref:`debops.docker`
 - :ref:`debops.docker_gen`
+- :ref:`debops.docker_registry`
 - :ref:`debops.libvirt`
 - :ref:`debops.libvirtd`
 - :ref:`debops.libvirtd_qemu`

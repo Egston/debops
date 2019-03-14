@@ -4,7 +4,10 @@
   # hardware virtualization support in the guest correctly. This is an
   # additional runtime check to account for that.
 - name: Check if host supports hardware virtualization
-  shell: egrep --color=auto 'vmx|svm|0xc0f' /proc/cpuinfo || true
+  shell: set -o nounset -o pipefail -o errexit &&
+         egrep --color=auto 'vmx|svm|0xc0f' /proc/cpuinfo || true
+  args:
+    executable: '/bin/bash'
   register: libvirtd_qemu__register_hw_virt
   check_mode: False
   changed_when: False
@@ -19,6 +22,8 @@
             else libvirtd_qemu__base_packages }}' ]
     - '{{ libvirtd_qemu__kvm_packages if libvirtd_qemu__kvm_support|bool else [] }}'
     - '{{ libvirtd_qemu__packages }}'
+  register: libvirtd_qemu__register_packages
+  until: libvirtd_qemu__register_packages is succeeded
   when: (ansible_local is undefined or
          (ansible_local|d() and ansible_local.libvirtd is undefined or
           (ansible_local|d() and ansible_local.libvirtd|d() and
