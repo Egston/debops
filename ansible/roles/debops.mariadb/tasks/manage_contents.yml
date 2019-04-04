@@ -175,7 +175,7 @@
 
 - name: Ensure that directory for custom file path .my.cnf exists
   file:
-    path: '{{ item.0.creds_path | regex_replace("^(.*/).*$", "\\1") }}'
+    path: '{{ item.0.creds_path | dirname }}'
     state: 'directory'
   with_together:
     - '{{ mariadb__users + lookup("flattened", mariadb__dependent_users, wantlist=True) + mariadb_users|d([]) }}'
