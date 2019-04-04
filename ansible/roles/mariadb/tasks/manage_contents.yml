@@ -186,7 +186,7 @@
 
 - name: Ensure that directory for custom file path .my.cnf exists
   file:
-    path: '{{ item.0.creds_path | regex_replace("^(.*/).*$", "\\1") }}'
+    path: '{{ item.0.creds_path | dirname }}'
     state: 'directory'
     mode: '{{ item.0.mode | d("0755") }}'
   with_together:
