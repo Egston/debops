@@ -140,6 +140,43 @@ rsyslog__file_owner: '{{ rsyslog__user }}'
 rsyslog__file_group: 'adm'
 
                                                                    # ]]]
+# .. envvar:: rsyslog__logfiles [[[
+#
+# List of additional logfiles managed by the ``debops.rsyslog`` role.
+rsyslog__logfiles: []
+
+                                                                   # ]]]
+# .. envvar:: rsyslog__group_logfiles [[[
+#
+# List of logfiles managed by ``rsyslog`` role. This
+# list is used in the :ref:`logrotate` configuration. See
+# :ref:`rsyslog__logfiles` for more details. This list should be used
+# for configuration of a group of hosts in the inventory.
+rsyslog__group_logfiles: []
+
+                                                                   # ]]]
+# .. envvar:: rsyslog__host_logfiles [[[
+#
+# List of logfiles managed by ``rsyslog`` role. This
+# list is used in the :ref:`logrotate` configuration. See
+# :ref:`rsyslog__logfiles` for more details. This list should be used
+# for configuration of specific hosts in the inventory.
+rsyslog__host_logfiles: []
+
+                                                                   # ]]]
+# .. envvar:: rsyslog__dependent_logfiles [[[
+#
+# List of logfiles managed by ``rsyslog`` role. This
+# list is used in the :ref:`logrotate` configuration. See
+# :ref:`rsyslog__logfiles` for more details. This list can be used for
+# configuration by other Ansible roles.
+#
+# If you use this you also need to call :ref:`logrotate`
+# role with :ref:`rsyslog__logrotate__dependent_config` passed in
+# :ref:`logrotate__dependent_config` variable.
+rsyslog__dependent_logfiles: []
+
+                                                                   # ]]]
 # .. envvar:: rsyslog__default_logfiles [[[
 #
 # List of default logfiles managed by ``debops.rsyslog`` role. This list is
@@ -160,12 +197,17 @@ rsyslog__default_logfiles:
   - '/var/log/cron.log'
   - '/var/log/lpr.log'
   - '/var/log/debug'
-
                                                                    # ]]]
-# .. envvar:: rsyslog__logfiles [[[
+# .. envvar:: rsyslog__combined_logfiles [[[
 #
-# List of additional logfiles managed by the ``debops.rsyslog`` role.
-rsyslog__logfiles: []
+
+# Variable which combines all of the logfiles.
+rsyslog__combined_logfiles: '{{ rsyslog__default_logfiles
+                                 + rsyslog__dependent_logfiles
+                                 + rsyslog__logfiles
+                                 + rsyslog__group_logfiles
+                                 + rsyslog__host_logfiles }}'
+
                                                                    # ]]]
                                                                    # ]]]
 # Encrypted communication [[[
@@ -1179,8 +1221,7 @@ rsyslog__logrotate__dependent_config:
                     "precise", "trusty" ]))
             else "/usr/lib/rsyslog/rsyslog-rotate" }}
 
-      - logs: '{{ (rsyslog__default_logfiles
-                   + rsyslog__logfiles)
+      - logs: '{{ rsyslog__combined_logfiles
                   | difference(["/var/log/syslog"]) }}'
         options: |
           rotate {{ rsyslog__rotation_count_system }}
