@@ -10,7 +10,7 @@
 from __future__ import print_function
 from json import loads, dumps
 from sys import exit, version_info
-from grp import getgrall
+from grp import getgrnam
 import socket
 
 
@@ -100,7 +100,6 @@ admin_blacklist_users = loads('''{{ (core__admin_blacklist_default_users
                                      + core__admin_blacklist_users)
                                      | unique | to_nice_json }}''')
 
-groups = getgrall()
 admin_users = set()
 
 if output['admin_users']:
@@ -113,11 +112,14 @@ if output['admin_users']:
             output['admin_users']))
 
 if output['admin_groups']:
-    for group in groups:
-        if group.gr_name in output['admin_groups']:
-            for name in group.gr_mem:
-                if name not in admin_blacklist_users:
-                    admin_users.add(name)
+    for group in output['admin_groups']:
+        try:
+            users = getgrnam(group).gr_mem
+        except KeyError:
+            continue
+        for name in users:
+            if name not in admin_blacklist_users:
+                admin_users.add(name)
 
 if admin_users:
     output.update({"admin_users": sorted(list(admin_users))})
