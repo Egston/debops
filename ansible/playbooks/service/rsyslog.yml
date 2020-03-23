@@ -11,24 +11,24 @@
   roles:
 
     - role: debops.etc_services
-      tags: [ 'role::etc_services', 'skip::etc_services' ]
+      tags: [ 'role::etc_services', 'skip::etc_services', 'role::rsyslog:full', 'skip::rsyslog:full' ]
       etc_services__dependent_list:
         - '{{ rsyslog__etc_services__dependent_list }}'
 
     - role: debops.apt_preferences
-      tags: [ 'role::apt_preferences', 'skip::apt_preferences' ]
+      tags: [ 'role::apt_preferences', 'skip::apt_preferences', 'role::rsyslog:full', 'skip::rsyslog:full' ]
       apt_preferences__dependent_list:
         - '{{ rsyslog__apt_preferences__dependent_list }}'
 
     - role: debops.ferm
-      tags: [ 'role::ferm', 'skip::ferm' ]
+      tags: [ 'role::ferm', 'skip::ferm', 'role::rsyslog:full', 'skip::rsyslog:full' ]
       ferm__dependent_rules:
         - '{{ rsyslog__ferm__dependent_rules }}'
 
     - role: debops.logrotate
-      tags: [ 'role::logrotate', 'skip::logrotate' ]
+      tags: [ 'role::logrotate', 'skip::logrotate', 'role::rsyslog:full', 'skip::rsyslog:full' ]
       logrotate__dependent_config:
         - '{{ rsyslog__logrotate__dependent_config }}'
 
     - role: debops.rsyslog
-      tags: [ 'role::rsyslog', 'skip::rsyslog' ]
+      tags: [ 'role::rsyslog', 'skip::rsyslog', 'role::rsyslog:full', 'skip::rsyslog:full' ]

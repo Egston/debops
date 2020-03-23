@@ -163,7 +163,7 @@
       tags: [ 'role::nullmailer', 'skip::nullmailer' ]
 
     - role: debops.rsyslog
-      tags: [ 'role::rsyslog', 'skip::rsyslog' ]
+      tags: [ 'role::rsyslog', 'skip::rsyslog', 'role::rsyslog:full', 'skip:rsyslog::full' ]
 
     - role: debops.unattended_upgrades
       tags: [ 'role::unattended_upgrades', 'skip::unattended_upgrades' ]
