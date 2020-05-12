@@ -34,6 +34,7 @@
   when: not mariadb__register_version.stdout
   failed_when: False
   changed_when: False
+  check_mode: no
 
 - name: Override delegation if tunnel is detected
   set_fact:
