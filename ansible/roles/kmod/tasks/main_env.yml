@@ -1,0 +1,6 @@
+---
+
+- name: Check if modprobe is available
+  stat:
+    path: '/sbin/modprobe'
+  register: kmod__register_modprobe
