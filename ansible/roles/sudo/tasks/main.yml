@@ -31,7 +31,7 @@
     line: '#includedir /etc/sudoers.d'
     insertafter: 'EOF'
     state: 'present'
-    validate: 'visudo -cf "%s"'
+    validate: '/usr/sbin/visudo -cf "%s"'
   when: sudo__enabled|bool
 
 - name: Remove sudoers configuration if requested
@@ -50,7 +50,7 @@
     owner: 'root'
     group: 'root'
     mode: '0440'
-    validate: 'visudo -cf %s'
+    validate: '/usr/sbin/visudo -cf %s'
   with_items: '{{ sudo__combined_sudoers | parse_kv_items }}'
   register: sudo__register_sudoers_created
   when: sudo__enabled|bool and
