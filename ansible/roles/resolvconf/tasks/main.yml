@@ -70,7 +70,7 @@
   when: resolvconf__enabled|bool and resolvconf__deploy_state == 'absent'
 
 - name: Regenerate /etc/resolv.conf
-  command: resolvconf -u
+  command: /sbin/resolvconf -u
   when: (resolvconf__enabled|bool and
          (resolvconf__register_interface_order_divert is changed or
           resolvconf__register_interface_order_config is changed or
