@@ -120,6 +120,10 @@ apt_listchanges__profile_apt:
   confirm: '0'
   which: '{{ apt_listchanges__apt_which }}'
   save_seen: '/var/lib/apt/listchanges.db'
+  email_format: 'text'
+  headers: 'false'
+  reverse: 'false'
+
 
                                                                    # ]]]
 # .. envvar:: apt_listchanges__profile_apticron [[[
