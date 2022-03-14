@@ -8,6 +8,15 @@
     insertbefore: '{{ "BOF" if environment__placement == "before" else omit }}'
     insertafter: '{{ "EOF" if environment__placement == "after" else omit }}'
 
+- name: Configure systemd's DefaultEnvironment in /etc/systemd/system.conf
+  ini_file:
+    path: /etc/systemd/system.conf
+    create: no
+    section: Manager
+    option: DefaultEnvironment
+    value: '{{ lookup("template", "lookup/environment__systemd-system.conf__default_environment.j2") }}'
+  notify: reload systemd
+
 - name: Make sure Ansible fact directory exists
   file:
     path: '/etc/ansible/facts.d'
