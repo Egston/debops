@@ -171,6 +171,6 @@ kmod__python__dependent_packages3: []
 # Configuration for the :ref:`debops.python` Ansible role.
 kmod__python__dependent_packages2:
 
-  - 'python-kmodpy'
+  - '{{ "python-kmodpy" if (kmod__enabled|bool) else [] }}'
                                                                    # ]]]
                                                                    # ]]]

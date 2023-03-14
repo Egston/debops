@@ -16,6 +16,11 @@
 
   pre_tasks:
 
+    - import_role:
+        name: 'kmod'
+        tasks_from: 'main_env'
+      tags: [ 'role::kmod', 'role::python' ]
+
     - name: Prepare ifupdown environment
       import_role:
         name: 'ifupdown'
