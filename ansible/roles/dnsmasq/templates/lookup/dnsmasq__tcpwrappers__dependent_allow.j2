@@ -12,10 +12,10 @@
 {%     if hostvars[inventory_hostname]["ansible_" + interface.name].ipv4|d() %}
 {%       set _ = dnsmasq__tpl_ipv4.append(hostvars[inventory_hostname]["ansible_" + interface.name].ipv4.address + '/'
                                           + (hostvars[inventory_hostname]["ansible_" + interface.name].ipv4.address + '/'
-                                             + hostvars[inventory_hostname]["ansible_" + interface.name].ipv4.netmask) | ipaddr('prefix')|string) %}
+                                             + hostvars[inventory_hostname]["ansible_" + interface.name].ipv4.netmask) | ansible.utils.ipaddr('prefix')|string) %}
 {%       if hostvars[inventory_hostname]["ansible_" + interface.name].ipv4_secondaries|d() %}
 {%         for element in hostvars[inventory_hostname]["ansible_" + interface.name].ipv4_secondaries %}
-{%           set _ = dnsmasq__tpl_ipv4.append(element.address + '/' + (element.address + '/' + element.netmask) | ipaddr('prefix')|string) %}
+{%           set _ = dnsmasq__tpl_ipv4.append(element.address + '/' + (element.address + '/' + element.netmask) | ansible.utils.ipaddr('prefix')|string) %}
 {%         endfor %}
 {%       endif %}
 {%     endif %}
@@ -51,7 +51,7 @@
 {% endfor %}
 {% set _ = dnsmasq__tpl_tcpwrappers__dependent_allow.append({
   "daemon": "in.tftpd",
-  "client": (dnsmasq__tpl_subnets | ipaddr('subnet')),
+  "client": (dnsmasq__tpl_subnets | ansible.utils.ipaddr('subnet')),
   "weight": 50,
   "filename": "dnsmasq_dependent_allow",
   "comment": "Allow remote connections to TFTP server",

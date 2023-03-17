@@ -62,8 +62,8 @@ allow-{{ thing }} {{ interface_name }}
 {%     endif %}
 iface {{ interface_name }} inet {{ interface.inet }}
 {%     if interface.inet == 'static' and ifupdown__tpl_ipv4_addresses %}
-    address         {{ ifupdown__tpl_ipv4_addresses[0] | ipaddr('address') }}
-    netmask         {{ ifupdown__tpl_ipv4_addresses[0] | ipaddr('netmask') }}
+    address         {{ ifupdown__tpl_ipv4_addresses[0] | ansible.utils.ipaddr('address') }}
+    netmask         {{ ifupdown__tpl_ipv4_addresses[0] | ansible.utils.ipaddr('netmask') }}
 {%       set _ = ifupdown__tpl_separate_stanza.append(True) %}
 {%       if ifupdown__tpl_ipv4_addresses | length > 1 %}
 {%         for address in ifupdown__tpl_ipv4_addresses[1:] %}

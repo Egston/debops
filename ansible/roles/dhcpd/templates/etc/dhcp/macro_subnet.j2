@@ -11,9 +11,9 @@
 # {{ subnet.comment }}
 {%      endif %}
 {%      if protocol == 'DHCPv4' %}
-subnet {{ subnet.subnet|ipaddr('network') }} netmask {{ subnet.subnet|ipaddr('netmask') }} {
+subnet {{ subnet.subnet|ansible.utils.ipaddr('network') }} netmask {{ subnet.subnet|ansible.utils.ipaddr('netmask') }} {
 {%      elif protocol == 'DHCPv6' %}
-subnet6 {{ subnet.subnet|ipaddr('network/prefix') }} {
+subnet6 {{ subnet.subnet|ansible.utils.ipaddr('network/prefix') }} {
 {%      endif %}
 {%      if subnet.options|d() %}
 
