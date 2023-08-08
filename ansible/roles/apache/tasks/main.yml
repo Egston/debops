@@ -72,7 +72,7 @@
 
 - name: Create conf-available snippets
   template:
-    src: '{{ lookup("template_src", "etc/apache2/conf-available/" + ("raw"
+    src: '{{ lookup("debops.debops.template_src", "etc/apache2/conf-available/" + ("raw"
                                         if (item.value.type|d("default") in ["divert", "raw"] and
                                             item.value.raw|d())
                                         else item.key) + ".conf.j2") }}'
@@ -132,7 +132,7 @@
 
 - name: Create sites-available configuration
   template:
-    src: '{{ lookup("template_src", "etc/apache2/sites-available/" + (item.type | d(apache__vhost_type)) + ".conf.j2") }}'
+    src: '{{ lookup("debops.debops.template_src", "etc/apache2/sites-available/" + (item.type | d(apache__vhost_type)) + ".conf.j2") }}'
     dest: '{{ apache__config_path }}/sites-available/{{ item.filename | d(item.name
                                                                           if (item.name is string)
                                                                           else item.name[0] | d("default")) }}.conf'
