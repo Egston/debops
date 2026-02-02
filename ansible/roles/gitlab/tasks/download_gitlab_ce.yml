@@ -57,7 +57,7 @@
   register: gitlab_register_ce_target_branch
   changed_when: gitlab_register_ce_target_branch.stdout != gitlab_register_ce_source.before
 
-- include: gitlab_ce_pre_upgrade.yml
+- include_tasks: gitlab_ce_pre_upgrade.yml
   when: (ansible_local|d() and ansible_local.gitlab|d() and
          (ansible_local.gitlab.installed|d() | bool) and
          ((gitlab_register_ce_target_branch.stdout != gitlab_register_ce_source.before) or

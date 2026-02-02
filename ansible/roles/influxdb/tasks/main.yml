@@ -53,6 +53,6 @@
   meta: 'flush_handlers'
 
 - name: Manage database contents
-  include: 'manage_contents.yml'
+  include_tasks: 'manage_contents.yml'
   when: (influxdb__server|d(False) and influxdb__delegate_to)
   tags: [ 'role::influxdb:contents' ]

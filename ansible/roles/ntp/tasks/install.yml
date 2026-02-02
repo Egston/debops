@@ -29,19 +29,19 @@
 # will pick up the configuration from `/etc/ntp.conf` when it exists.
 
 # Install chrony on all hosts except inside containers
-- include: chrony.yml
+- include_tasks: chrony.yml
   when: ntp__daemon == 'chrony'
 
   # Install NTPd on all hosts except inside containers
-- include: ntpd.yml
+- include_tasks: ntpd.yml
   when: ntp__daemon in [ 'ntpd', 'ntpdate' ]
 
   # Install OpenNTPd on all hosts except inside containers
-- include: openntpd.yml
+- include_tasks: openntpd.yml
   when: ntp__daemon == 'openntpd'
 
   # Configure systemd-timesyncd
 - name: Include systemd-timesyncd configuration
-  include: systemd-timesyncd.yml
+  include_tasks: systemd-timesyncd.yml
   when: (ansible_service_mgr == "systemd" and
          ntp__daemon == 'systemd-timesyncd')

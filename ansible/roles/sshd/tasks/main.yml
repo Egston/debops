@@ -17,7 +17,7 @@
     name: 'secret'
 
 - name: Pre hooks
-  include: '{{ lookup("debops.debops.task_src", "sshd/pre_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "sshd/pre_main.yml") }}'
 
 - name: Make sure that Ansible local fact directory exists
   file:
@@ -131,7 +131,7 @@
   tags: [ 'role::sshd:config' ]
 
 - name: Configure authorized_keys lookup
-  include: authorized_keys_lookup.yml
+  include_tasks: authorized_keys_lookup.yml
   when: sshd__register_version.stdout|d() and
         sshd__register_version.stdout is version_compare('6.2', '>=') and
         sshd__authorized_keys_lookup|bool
@@ -235,4 +235,4 @@
   when: sshd__pam_deploy_state == 'present'
 
 - name: Post hooks
-  include: '{{ lookup("debops.debops.task_src", "sshd/post_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "sshd/post_main.yml") }}'

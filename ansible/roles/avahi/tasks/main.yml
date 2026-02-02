@@ -92,7 +92,7 @@
   when: item.key|d() and item.value|d()
 
 - name: Configure Avahi CNAME aliases
-  include: avahi_alias.yml
+  include_tasks: avahi_alias.yml
   when: avahi__alias_enabled|bool
   tags: [ 'role::avahi:alias' ]
 

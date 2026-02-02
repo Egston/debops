@@ -16,7 +16,7 @@
     name: 'secret'
 
 - name: DebOps pre_tasks hook
-  include: '{{ lookup("debops.debops.task_src", "tgt/pre_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "tgt/pre_main.yml") }}'
 
 - name: Install required packages
   package:
@@ -73,4 +73,4 @@
   tags: [ 'meta::facts' ]
 
 - name: DebOps post_tasks hook
-  include: '{{ lookup("debops.debops.task_src", "tgt/post_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "tgt/post_main.yml") }}'

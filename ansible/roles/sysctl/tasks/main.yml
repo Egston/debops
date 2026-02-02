@@ -19,7 +19,7 @@
     name: 'global_handlers'
 
 - name: Pre hooks
-  include: '{{ lookup("debops.debops.task_src", "sysctl/pre_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "sysctl/pre_main.yml") }}'
   when: sysctl__enabled|bool
 
 - name: Make sure that Ansible local facts directory exists
@@ -103,5 +103,5 @@
           sysctl__register_config_removed is changed))
 
 - name: Post hooks
-  include: '{{ lookup("debops.debops.task_src", "sysctl/post_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "sysctl/post_main.yml") }}'
   when: sysctl__enabled|bool

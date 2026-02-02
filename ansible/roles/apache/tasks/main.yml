@@ -49,7 +49,7 @@
                                        | map("regex_replace", "\.load$", "") | list }}'
   tags: [ 'role::apache:modules' ]
 
-- include: apache_module_state.yml
+- include_tasks: apache_module_state.yml
 
 # Manage Apache configuration snippets [[[1
 - name: Divert conf-available configuration
@@ -177,4 +177,4 @@
   changed_when: False
   when: apache__register_mod_rewrite_used is undefined
 
-- include: apache_module_state.yml
+- include_tasks: apache_module_state.yml

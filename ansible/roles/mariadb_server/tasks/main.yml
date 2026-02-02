@@ -86,7 +86,7 @@
   when: (mariadb_server__register_version|d() and not mariadb_server__register_version.stdout)
 
 - name: Configure database server
-  include: 'configure_server.yml'
+  include_tasks: 'configure_server.yml'
   tags: [ 'role::mariadb_server:configure' ]
 
 - name: Start database server on first install
@@ -97,7 +97,7 @@
          (mariadb_server__register_install_status|d() and mariadb_server__register_install_status is changed))
 
 - name: Secure database server
-  include: 'secure_installation.yml'
+  include_tasks: 'secure_installation.yml'
   tags: [ 'role::mariadb_server:secure' ]
 
 - name: Make sure that local fact directory exists

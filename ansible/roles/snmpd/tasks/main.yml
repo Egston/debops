@@ -141,7 +141,7 @@
   notify: [ 'Restart snmpd' ]
 
 - name: Configure SNMPv3 credentials
-  include: configure_snmpv3_credentials.yml
+  include_tasks: configure_snmpv3_credentials.yml
   when: ((snmpd_register_version|d() and not snmpd_register_version.stdout) and
          (snmpd_account|d() and snmpd_account))
 

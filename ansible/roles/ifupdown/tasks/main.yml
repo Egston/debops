@@ -41,7 +41,7 @@
     purge: True
 
 - name: Create custom ifupdown systemd services
-  include: ifup_systemd.yml
+  include_tasks: ifup_systemd.yml
   when: ansible_service_mgr == 'systemd'
 
 - name: Reset network configuration on role upgrade
@@ -65,7 +65,7 @@
     - '/etc/network/interfaces.config.d'
 
 - name: Preserve original network configuration
-  include: divert_interfaces.yml
+  include_tasks: divert_interfaces.yml
 
 - name: Remove network interface configuration
   file:

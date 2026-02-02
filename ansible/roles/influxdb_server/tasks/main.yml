@@ -92,7 +92,7 @@
   when: not (ansible_local.influxdb_server.installed|d(false)|bool)
 
 - name: Configure autoinfluxdbbackup
-  include: 'autoinfluxdbbackup.yml'
+  include_tasks: 'autoinfluxdbbackup.yml'
   when: influxdb_server__backup|bool
   tags: [ 'role::influxdb_server:autoinfluxdbbackup' ]
 

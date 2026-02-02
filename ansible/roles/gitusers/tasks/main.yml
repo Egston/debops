@@ -11,9 +11,9 @@
     group: 'root'
     mode: '0751'
 
-- include: groups_present.yml
-- include: gitusers.yml
-- include: git-shell.yml
+- include_tasks: groups_present.yml
+- include_tasks: gitusers.yml
+- include_tasks: git-shell.yml
 #- include: forward.yml
-- include: sshkeys.yml
-- include: groups_absent.yml
+- include_tasks: sshkeys.yml
+- include_tasks: groups_absent.yml

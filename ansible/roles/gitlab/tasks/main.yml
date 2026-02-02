@@ -71,7 +71,7 @@
     group: '{{ gitlab_group }}'
     mode: '0644'
 
-- include: download_gitlab_ce.yml
+- include_tasks: download_gitlab_ce.yml
 
 - name: Check GitLab version numbers
   script: 'script/gitlab-version{{ "2" if (ansible_python_version is version_compare("3.5", "<")) else "3" }}
@@ -89,19 +89,19 @@
       workhorse: '{{ (gitlab__register_version.stdout | from_json)["gitlab_workhorse_version"] | d("") }}'
       ce:        '{{ (gitlab__register_version.stdout | from_json)["version"]                  | d("") }}'
 
-- include: configure_gitlab-shell.yml
+- include_tasks: configure_gitlab-shell.yml
 
-- include: configure_gitlab-pages.yml
+- include_tasks: configure_gitlab-pages.yml
   when: gitlab_enable_pages | bool
 
-- include: configure_gitlab-workhorse.yml
+- include_tasks: configure_gitlab-workhorse.yml
 
-- include: configure_gitlab_ce.yml
+- include_tasks: configure_gitlab_ce.yml
 
-- include: configure_gitaly.yml
+- include_tasks: configure_gitaly.yml
   when: gitlab_version is version_compare("9.0", operator="gt", strict=True)
 
-- include: start_gitlab_ce.yml
+- include_tasks: start_gitlab_ce.yml
 
 - name: Make sure that Ansible local facts directory exists
   file:

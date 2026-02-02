@@ -12,7 +12,7 @@
     name: 'global_handlers'
 
 - name: DebOps pre_tasks hook
-  include: "{{ lookup('debops.debops.task_src', 'machine/pre_main.yml') }}"
+  include_tasks: "{{ lookup('debops.debops.task_src', 'machine/pre_main.yml') }}"
 
 - name: Install requested packages
   package:
@@ -200,4 +200,4 @@
   meta: 'flush_handlers'
 
 - name: DebOps post_tasks hook
-  include: "{{ lookup('debops.debops.task_src', 'machine/post_main.yml') }}"
+  include_tasks: "{{ lookup('debops.debops.task_src', 'machine/post_main.yml') }}"

@@ -15,7 +15,7 @@
 
 # DebOps pre-hook [[[1
 - name: Pre hooks
-  include: '{{ lookup("debops.debops.task_src", "resources/pre_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "resources/pre_main.yml") }}'
 
 # Manage custom templates [[[1
 - name: Ensure that template directories exist
@@ -351,4 +351,4 @@
 
 # DebOps post-hook [[[1
 - name: Post hooks
-  include: '{{ lookup("debops.debops.task_src", "resources/post_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "resources/post_main.yml") }}'

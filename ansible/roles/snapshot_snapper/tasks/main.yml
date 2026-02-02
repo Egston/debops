@@ -156,7 +156,7 @@
 # .. ]]]
 
 - name: Adjust configuration per volume
-  include: configure_snapper_volume.yml
+  include_tasks: configure_snapper_volume.yml
   loop_control:
     loop_var: 'snapshot_snapper__volume'
   with_items: '{{ snapshot_snapper__volumes_combined }}'

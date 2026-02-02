@@ -52,7 +52,7 @@
                                            'bionic' ])
 
 - name: Manage LVM
-  include: manage_lvm.yml
+  include_tasks: manage_lvm.yml
   when: (((ansible_system_capabilities_enforced|d())|bool and
           "cap_sys_admin" in ansible_system_capabilities) or
          not (ansible_system_capabilities_enforced|d(True))|bool)

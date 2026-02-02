@@ -21,7 +21,7 @@
   until: ntp__register_apt_purge is succeeded
 
   # Installs either ntpdate, NTPd, chrony or OpenNTPd on all hosts except inside containers
-- include: install.yml
+- include_tasks: install.yml
   when: ntp__daemon_enabled|bool
 
 - name: Make sure that Ansible local facts directory exists

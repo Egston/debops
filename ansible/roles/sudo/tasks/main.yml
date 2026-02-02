@@ -23,7 +23,7 @@
   when: sudo__enabled|bool and sudo__ldap_enabled|bool
 
 - name: DebOps pre_tasks hook
-  include: "{{ lookup('debops.debops.task_src', 'sudo/pre_main.yml') }}"
+  import_tasks: "{{ lookup('debops.debops.task_src', 'sudo/pre_main.yml') }}"
 
 - name: Install required packages
   environment:
@@ -105,4 +105,4 @@
   meta: 'flush_handlers'
 
 - name: DebOps post_tasks hook
-  include: "{{ lookup('debops.debops.task_src', 'sudo/post_main.yml') }}"
+  include_tasks: "{{ lookup('debops.debops.task_src', 'sudo/post_main.yml') }}"

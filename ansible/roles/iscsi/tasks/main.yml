@@ -16,7 +16,7 @@
     name: 'secret'
 
 - name: DebOps pre_tasks hook
-  include: "{{ lookup('debops.debops.task_src', 'iscsi/pre_main.yml') }}"
+  include_tasks: "{{ lookup('debops.debops.task_src', 'iscsi/pre_main.yml') }}"
 
 - name: Install required iSCSI packages
   package:
@@ -99,10 +99,10 @@
   tags: [ 'meta::facts' ]
 
 - name: Manage LVM
-  include: manage_lvm.yml
+  include_tasks: manage_lvm.yml
   when: (((ansible_system_capabilities_enforced|d())|bool and
           "cap_sys_admin" in ansible_system_capabilities) or
          not (ansible_system_capabilities_enforced|d(True))|bool)
 
 - name: DebOps post_tasks hook
-  include: "{{ lookup('debops.debops.task_src', 'iscsi/post_main.yml') }}"
+  include_tasks: "{{ lookup('debops.debops.task_src', 'iscsi/post_main.yml') }}"

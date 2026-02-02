@@ -17,7 +17,7 @@
     name: 'secret'
 
 - name: DebOps pre_tasks hook
-  include: '{{ lookup("debops.debops.task_src", "nginx/pre_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "nginx/pre_main.yml") }}'
   when: (nginx__deploy_state in [ 'present' ])
 
 - name: Assert that no legacy options are used
@@ -116,7 +116,7 @@
     path: '/etc/nginx/conf.d/default.conf'
   when: (nginx_flavor == 'nginx.org' and nginx__deploy_state in [ 'present', 'config' ])
 
-- include: 'passenger_config.yml'
+- include_tasks: 'passenger_config.yml'
   when: (nginx_flavor == 'passenger' and nginx__deploy_state in [ 'present', 'config' ])
 
 - name: Restart nginx on first install to bypass missing pid bug
@@ -235,14 +235,14 @@
     creates: '/etc/ansible/facts.d/nginx.fact'
   when: (nginx__deploy_state in [ 'present', 'config' ])
 
-- include: 'nginx_htpasswd.yml'
+- include_tasks: 'nginx_htpasswd.yml'
   when: (nginx__deploy_state in [ 'present', 'config' ])
 
-- include: 'nginx_configs.yml'
+- include_tasks: 'nginx_configs.yml'
   tags: [ 'role::nginx:servers' ]
   when: (nginx__deploy_state in [ 'present', 'config' ])
 
-- include: 'nginx_servers.yml'
+- include_tasks: 'nginx_servers.yml'
   tags: [ 'role::nginx:servers' ]
   when: (nginx__deploy_state in [ 'present', 'config' ])
 
@@ -283,5 +283,5 @@
   meta: 'flush_handlers'
 
 - name: DebOps post_tasks hook
-  include: '{{ lookup("debops.debops.task_src", "nginx/post_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "nginx/post_main.yml") }}'
   when: (nginx__deploy_state in [ 'present' ])

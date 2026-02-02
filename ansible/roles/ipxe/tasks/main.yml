@@ -56,7 +56,7 @@
   loop: '{{ ipxe__bootloaders }}'
 
 - name: Configure Debian netboot installers
-  include: debian_netboot.yml
+  include_tasks: debian_netboot.yml
   when: ipxe__debian_netboot_enabled|bool
 
 - name: Make sure that Ansible local facts directory exists

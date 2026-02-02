@@ -114,7 +114,7 @@
 # ownCloud applications configuration [[[1
 
 - name: Get current ownCloud configuration via occ config:list
-  include: 'run_occ.yml'
+  include_tasks: 'run_occ.yml'
   loop_control:
     loop_var: 'owncloud__occ_item'
   tags: [ 'role::owncloud:occ_config' ]
@@ -131,7 +131,7 @@
   tags: [ 'role::owncloud:occ_config' ]
 
 - name: Set ownCloud apps configuration for each app
-  include: 'run_occ_app_set.yml'
+  include_tasks: 'run_occ_app_set.yml'
   loop_control:
     loop_var: 'owncloud__apps_item'
   with_dict: '{{ owncloud__apps_config_combined|d({}) }}'
@@ -142,7 +142,7 @@
 
 # Run occ commands as specified in the inventory [[[
 - name: Run occ commands as specified in the inventory
-  include: 'run_occ.yml'
+  include_tasks: 'run_occ.yml'
   loop_control:
     loop_var: 'owncloud__occ_item'
   tags: [ 'role::owncloud:occ' ]

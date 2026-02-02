@@ -60,7 +60,7 @@
   when: (item.dest|d() and (item.state|d('present') == 'absent'))
 
 - name: Run occ commands as specified in the inventory
-  include: 'run_occ.yml'
+  include_tasks: 'run_occ.yml'
   loop_control:
     loop_var: 'owncloud__files_scan_item'
   when: owncloud__files_scan_item is changed

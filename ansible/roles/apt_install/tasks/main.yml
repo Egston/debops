@@ -13,7 +13,7 @@
     name: 'global_handlers'
 
 - name: Pre hooks
-  include: '{{ lookup("debops.debops.task_src", "apt_install/pre_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "apt_install/pre_main.yml") }}'
 
 - name: Make sure that Ansible fact directory exists
   file:
@@ -108,4 +108,4 @@
   when: apt_install__enabled|bool and apt_install__no_kernel_hints|bool
 
 - name: Post hooks
-  include: '{{ lookup("debops.debops.task_src", "apt_install/post_main.yml") }}'
+  include_tasks: '{{ lookup("debops.debops.task_src", "apt_install/post_main.yml") }}'

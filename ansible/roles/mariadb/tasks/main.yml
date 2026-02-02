@@ -94,6 +94,6 @@
   meta: 'flush_handlers'
 
 - name: Manage database contents
-  include: 'manage_contents.yml'
+  include_tasks: 'manage_contents.yml'
   when: (mariadb__server|d(False) and mariadb__delegate_to)
   tags: [ 'role::mariadb:contents' ]

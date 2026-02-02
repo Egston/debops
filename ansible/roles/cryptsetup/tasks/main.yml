@@ -76,12 +76,12 @@
 #     msg: '{{ ([{"execution_strategy": "serial"}, {"some":23}])
 #              | selectattr("execution_strategy", "equalto", "serial") | list }}'
 #
-- include: 'manage_devices.yml'
+- include_tasks: 'manage_devices.yml'
   when: cryptsetup__devices_execution_strategy == 'parallel'
   vars:
     cryptsetup__process_devices: '{{ cryptsetup__combined_devices }}'
 
-- include: 'manage_devices.yml'
+- include_tasks: 'manage_devices.yml'
   when: cryptsetup__devices_execution_strategy == 'serial'
   with_items: '{{ cryptsetup__combined_devices }}'
   loop_control:

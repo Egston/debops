@@ -47,7 +47,7 @@
   until: apt_cacher_ng__register_packages is succeeded
 
 - name: Run tasks related to deploy state present
-  include: state_present.yml
+  include_tasks: state_present.yml
   when: (apt_cacher_ng__deploy_state == 'present')
 
 - name: Remove cache directory if deploy state is purge

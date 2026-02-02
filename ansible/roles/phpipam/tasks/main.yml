@@ -8,8 +8,8 @@
   import_role:
     name: 'secret'
 
-- include: phpipam.yml
+- include_tasks: phpipam.yml
   when: phpipam__mode is defined and 'webui' in phpipam__mode
 
-- include: phpipam-scripts.yml
+- include_tasks: phpipam-scripts.yml
   when: phpipam__mode is defined and 'scripts' in phpipam__mode
