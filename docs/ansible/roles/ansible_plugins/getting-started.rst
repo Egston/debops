@@ -174,10 +174,10 @@ Ansible roles:
   corresponds to the file included in the role itself.
 
 ``debops.debops.lists``
-  This lookup plugin implements the ``with_lists`` lookup. Similar to
-  ``with_flattened`` lookup, the difference is the lists are not flattened all
-  the way into a single list, therefore you can perform a "list of lists"
-  tasks.
+  This lookup plugin implements the ``with_lists`` lookup. Similar to using
+  the ``flattened`` lookup with ``loop``, the difference is the lists are not
+  flattened all the way into a single list, therefore you can perform a "list
+  of lists" tasks.
 
 ``debops.debops.task_src``
   This lookup plugin allows injection of custom Ansible tasks into roles without

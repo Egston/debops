@@ -24,8 +24,9 @@
   args:
     creates: '/etc/postgresql/{{ item.version | d(postgresql_server__version) }}/{{ item.name }}/postgresql.conf'
   register: postgresql_server__register_createcluster
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d() and item.port|d()
 
 - name: Remove data directory for PostgreSQL replication standby clusters
@@ -75,8 +76,9 @@
     group: '{{ item.group | d(postgresql_server__group) }}'
     state: directory
     recurse: yes
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.log_directory|d() and item.log_directory is abs
   tags: [ 'role::postgresql_server:config' ]
 
@@ -87,8 +89,9 @@
     owner: '{{ item.user | d(postgresql_server__user) }}'
     group: '{{ item.group | d(postgresql_server__group) }}'
     mode: '0755'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d()
   tags: [ 'role::postgresql_server:config' ]
 
@@ -99,8 +102,9 @@
     owner: '{{ item.user | d(postgresql_server__user) }}'
     group: '{{ item.group | d(postgresql_server__group) }}'
     mode: '0644'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d()
   register: postgresql_server__register_config
   tags: [ 'role::postgresql_server:config' ]
@@ -112,8 +116,9 @@
     owner: '{{ item.user | d(postgresql_server__user) }}'
     group: '{{ item.group | d(postgresql_server__group) }}'
     mode: '0644'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d()
   register: postgresql_server__register_config_environment
   tags: [ 'role::postgresql_server:config' ]
@@ -125,8 +130,9 @@
     owner: '{{ item.user | d(postgresql_server__user) }}'
     group: '{{ item.group | d(postgresql_server__group) }}'
     mode: '0640'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d()
   register: postgresql_server__register_config_ident
   tags: [ 'role::postgresql_server:config' ]
@@ -138,8 +144,9 @@
     owner: '{{ item.user | d(postgresql_server__user) }}'
     group: '{{ item.group | d(postgresql_server__group) }}'
     mode: '0640'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d()
   register: postgresql_server__register_config_hba
   tags: [ 'role::postgresql_server:config' ]
@@ -151,8 +158,9 @@
     owner: '{{ item.user | d(postgresql_server__user) }}'
     group: '{{ item.group | d(postgresql_server__group) }}'
     mode: '0640'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d()
   register: postgresql_server__register_trusted
   tags: [ 'role::postgresql_server:config' ]
@@ -164,8 +172,9 @@
     owner: '{{ item.user | d(postgresql_server__user) }}'
     group: '{{ item.group | d(postgresql_server__group) }}'
     mode: '0644'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: item.name|d()
   register: postgresql_server__register_config_start
   tags: [ 'role::postgresql_server:config' ]
@@ -179,8 +188,9 @@
               + "/root.crt" }}'
     state: 'link'
     mode: '0644'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: ((postgresql_server__pki|d() and postgresql_server__pki | bool) and
          (item.name|d()) and
          ((item.version|d() and item.version == '9.1') or
@@ -195,8 +205,9 @@
               + "/server.crt" }}'
     state: 'link'
     mode: '0644'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: ((postgresql_server__pki|d() and postgresql_server__pki | bool) and
          (item.name|d()) and
          ((item.version|d() and item.version == '9.1') or
@@ -211,8 +222,9 @@
               + "/server.key" }}'
     state: 'link'
     mode: '0640'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: ((postgresql_server__pki|d() and postgresql_server__pki | bool) and
          (item.name|d()) and
          ((item.version|d() and item.version == '9.1') or
@@ -223,8 +235,9 @@
   args:
     creates: '{{ item.external_pid_file | d("/var/run/postgresql/" + (item.version | d(postgresql_server__version))
                                             + "-" + item.name + ".pid") }}'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: (ansible_service_mgr != 'systemd' and
          ((item.name|d()) and
           (item.start_conf is undefined or item.start_conf == 'auto')))
@@ -233,19 +246,21 @@
   service:
     name: 'postgresql@{{ item.version | d(postgresql_server__version) }}-{{ item.name }}.service'
     state: 'started'
-  with_flattened:
-    - '{{ postgresql_server__clusters }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__clusters,
+  ]) }}"
   when: (ansible_service_mgr == 'systemd' and
          ((item.name|d()) and
           (item.start_conf is undefined or item.start_conf == 'auto')))
 
 - name: Reload PostgreSQL clusters when needed
   command: 'pg_ctlcluster {{ item.item.version | d(postgresql_server__version) }} {{ item.item.name }} reload'  # noqa no-handler
-  with_flattened:
-    - '{{ postgresql_server__register_config.results }}'
-    - '{{ postgresql_server__register_config_hba.results }}'
-    - '{{ postgresql_server__register_config_ident.results }}'
-    - '{{ postgresql_server__register_trusted.results }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__register_config.results,
+    postgresql_server__register_config_hba.results,
+    postgresql_server__register_config_ident.results,
+    postgresql_server__register_trusted.results,
+  ]) }}"
   when: (ansible_service_mgr != 'systemd' and
          ((item is changed and
           (item.item.start_conf is undefined or item.item.start_conf == 'auto'))))
@@ -255,11 +270,12 @@
   service:  # noqa no-handler
     name: 'postgresql@{{ item.item.version | d(postgresql_server__version) }}-{{ item.item.name }}.service'
     state: 'reloaded'
-  with_flattened:
-    - '{{ postgresql_server__register_config.results }}'
-    - '{{ postgresql_server__register_config_hba.results }}'
-    - '{{ postgresql_server__register_config_ident.results }}'
-    - '{{ postgresql_server__register_trusted.results }}'
+  loop: "{{ q('flattened', [
+    postgresql_server__register_config.results,
+    postgresql_server__register_config_hba.results,
+    postgresql_server__register_config_ident.results,
+    postgresql_server__register_trusted.results,
+  ]) }}"
   when: (ansible_service_mgr == 'systemd' and
          ((item is changed and
           (item.item.start_conf is undefined or item.item.start_conf == 'auto'))))

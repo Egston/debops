@@ -8,7 +8,7 @@
     name: '{{ item.database | d(item.name) }}'
     state: 'absent'
     login_unix_socket: '/run/mysqld/mysqld.sock'
-  with_flattened: '{{ mariadb__databases + mariadb__dependent_databases + mariadb_databases|d([]) }}'
+  loop: '{{ q("flattened", mariadb__databases + mariadb__dependent_databases + mariadb_databases|d([])) }}'
   delegate_to: '{{ mariadb__delegate_to }}'
   when: ((item.database|d(False) or item.name|d(False)) and
          (item.state is defined and item.state == 'absent'))
@@ -20,7 +20,7 @@
     encoding: '{{ item.encoding | d(omit) }}'
     collation: '{{ item.collation | d(omit) }}'
     login_unix_socket: '/run/mysqld/mysqld.sock'
-  with_flattened: '{{ mariadb__databases + mariadb__dependent_databases + mariadb_databases|d([]) }}'
+  loop: '{{ q("flattened", mariadb__databases + mariadb__dependent_databases + mariadb_databases|d([])) }}'
   delegate_to: '{{ mariadb__delegate_to }}'
   when: ((item.database|d(False) or item.name|d(False)) and
          (item.state is undefined or item.state != 'absent'))
@@ -64,7 +64,7 @@
   file:
     dest: '{{ item.target }}'
     state: 'absent'
-  with_flattened: '{{ mariadb__databases + mariadb__dependent_databases + mariadb_databases|d([]) }}'
+  loop: '{{ q("flattened", mariadb__databases + mariadb__dependent_databases + mariadb_databases|d([])) }}'
   delegate_to: '{{ mariadb__delegate_to }}'
   when: ((item.database|d(False) or item.name|d(False)) and
          (item.state is undefined or item.state != 'absent') and
@@ -77,7 +77,7 @@
     host: '{{ item.host | default(mariadb__client) }}'
     state: 'absent'
     login_unix_socket: '/run/mysqld/mysqld.sock'
-  with_flattened: '{{ mariadb__users + mariadb__dependent_users + mariadb_users|d([]) }}'
+  loop: '{{ q("flattened", mariadb__users + mariadb__dependent_users + mariadb_users|d([])) }}'
   delegate_to: '{{ mariadb__delegate_to }}'
   when: ((item.user|d(False) or item.name|d(False)) and
          (item.state is defined and item.state == "absent"))
@@ -93,7 +93,7 @@
                   "/credentials/" + item.user | d(item.name) + "/password " +
                   "length=" + mariadb__password_length)) }}'
     login_unix_socket: '/run/mysqld/mysqld.sock'
-  with_flattened: '{{ mariadb__users + mariadb__dependent_users + mariadb_users|d([]) }}'
+  loop: '{{ q("flattened", mariadb__users + mariadb__dependent_users + mariadb_users|d([])) }}'
   delegate_to: '{{ mariadb__delegate_to }}'
   register: mariadb__register_create_users
   when: ((item.user|d(False) or item.name|d(False)) and
@@ -155,7 +155,7 @@
     name: '{{ item.group | d(item.owner) }}'
     state: 'present'
     system: '{{ item.system | d(True) }}'
-  with_flattened: '{{ mariadb__users + mariadb__dependent_users + mariadb_users|d([]) }}'
+  loop: '{{ q("flattened", mariadb__users + mariadb__dependent_users + mariadb_users|d([])) }}'
   when: ((item.user|d(False) or item.name|d(False)) and
          (item.state is undefined or item.state != "absent") and
          item.owner|d(False) and item.home|d(False))
@@ -168,7 +168,7 @@
     home: '{{ item.home }}'
     state: 'present'
     system: '{{ item.system | d(True) }}'
-  with_flattened: '{{ mariadb__users + mariadb__dependent_users + mariadb_users|d([]) }}'
+  loop: '{{ q("flattened", mariadb__users + mariadb__dependent_users + mariadb_users|d([])) }}'
   when: ((item.user|d(False) or item.name|d(False)) and
          (item.state is undefined or item.state != "absent") and
          item.owner|d(False) and item.home|d(False))
@@ -178,7 +178,7 @@
   file:
     dest: '{{ "~" + item.owner + "/.my.cnf" }}'
     state: 'absent'
-  with_flattened: '{{ mariadb__users + mariadb__dependent_users + mariadb_users|d([]) }}'
+  loop: '{{ q("flattened", mariadb__users + mariadb__dependent_users + mariadb_users|d([])) }}'
   when: ((item.user|d(False) or item.name|d(False)) and
          (item.state is defined and item.state == "absent") and
          item.owner|d(False))

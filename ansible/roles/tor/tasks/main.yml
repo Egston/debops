@@ -11,5 +11,5 @@
 #   package:
 #     name: '{{ item }}'
 #     state: '{{ "present" if (tor__deploy_state == "present") else "absent" }}'
-#   with_flattened: '{{ tor__base_packages }}'
+#   loop: '{{ q("flattened", tor__base_packages) }}'
 #   tags: [ 'role::tor:pkgs' ]

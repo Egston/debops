@@ -48,7 +48,7 @@ Next, in your role task list, include set of tasks that will create the
        name:    '{{ item.name    | d(item) }}'
        version: '{{ item.version | d(omit) }}'
        virtualenv: '/path/to/virtualenv'
-     with_flattened: '{{ application__virtualenv_pip_packages }}'
+     loop: '{{ q("flattened", application__virtualenv_pip_packages) }}'
      become_user: 'app-user'
 
 The above steps should ensure that the application deployed in the
