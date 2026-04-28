@@ -63,9 +63,9 @@
   loop_control:
     label: '{{ {"identity": item.identity,
                 "state": (item.state|d("present")
-                          if (item.user in getent_passwd.keys() and (item.home|d())|bool)
+                          if (item.user in (getent_passwd|d({})).keys() and (item.home|d())|bool)
                           else ("no user"
-                                if (item.user not in getent_passwd.keys() and (item.home|d())|bool)
+                                if (item.user not in (getent_passwd|d({})).keys() and (item.home|d())|bool)
                                 else item.state|d("present"))),
                 "user": item.user,
                 "path": item.path|d("~" + item.user + "/.ssh/authorized_keys")} }}'
