@@ -61,7 +61,7 @@ except NameError:
 try:
     with open(os.devnull, 'w') as devnull:
         RELEASE = subprocess.check_output(
-                ['git', 'describe'], stderr=devnull
+                ['git', 'describe', '--tags'], stderr=devnull
                 ).strip().lstrip(b'v').decode('utf-8')
 except subprocess.CalledProcessError:
     try:
