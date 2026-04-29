@@ -63,6 +63,12 @@ try:
         RELEASE = subprocess.check_output(
                 ['git', 'describe', '--tags'], stderr=devnull
                 ).strip().lstrip(b'v').decode('utf-8')
+    # `git describe` returns "<tag>-<n>-g<sha>" on non-tagged commits.
+    # PEP 440 rejects dashes there, so move the suffix into the local
+    # version segment: "3.0.4.post2-5-gabc" -> "3.0.4.post2+5.gabc".
+    _parts = RELEASE.split('-')
+    if len(_parts) > 1:
+        RELEASE = _parts[0] + '+' + '.'.join(_parts[1:])
 except subprocess.CalledProcessError:
     try:
         RELEASE = open('VERSION').read().strip()
