@@ -8,20 +8,25 @@
     name: 'global_handlers'
 
 - name: Create required directories
-  file:
-    path: '{{ item }}'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
-  loop: "{{ q('flattened', [
-    [ '{{ docker_gen__src }}',
-    '{{ docker_gen__lib }}',
-    '{{ docker_gen__templates }}' ],
-    [ '{{ ((docker_gen__nginx_dest | dirname),
-  ]) }}"
-             if (docker_gen__nginx|d() and docker_gen__nginx)
-             else []) }}' ]
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: >-
+    {{
+      [
+        docker_gen__src,
+        docker_gen__lib,
+        docker_gen__templates
+      ]
+      + (
+        [ docker_gen__nginx_dest | dirname ]
+        if (docker_gen__nginx | d(false) | bool)
+        else []
+      )
+    }}
 
 - name: Download docker-gen sources
   get_url:
