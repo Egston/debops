@@ -77,8 +77,7 @@
       This file disables the ssh server.  It was created by debops.sshd.
       This file will be removed when configuration is successfully completed.
     mode: '0644'
-  when: (ansible_local|d() and ansible_local.sshd|d() and
-         not (ansible_local.sshd.installed|d())|bool)
+  when: (not (((ansible_local | d({})).sshd | d({})).installed | d(False) | bool))
 
   # In a case where the OpenSSH server is installed by the role but not started
   # due to conditions specified above, this task will ensure that the runtime
@@ -126,13 +125,13 @@
   args:
     chdir: '/etc/ssh'
     creates: '/etc/ssh/ssh_host_ed25519_key'
-  when: sshd__register_version.stdout|d() and
+  when: (sshd__register_version.stdout | d('') | length > 0) and
         sshd__register_version.stdout is version_compare('6.5', '>=')
   tags: [ 'role::sshd:config' ]
 
 - name: Configure authorized_keys lookup
   include_tasks: authorized_keys_lookup.yml
-  when: sshd__register_version.stdout|d() and
+  when: (sshd__register_version.stdout | d('') | length > 0) and
         sshd__register_version.stdout is version_compare('6.2', '>=') and
         sshd__authorized_keys_lookup|bool
   tags: [ 'role::sshd:config' ]
