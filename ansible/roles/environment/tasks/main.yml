@@ -23,6 +23,7 @@
     option: DefaultEnvironment
     value: '{{ lookup("template", "lookup/environment__systemd-system.conf__default_environment.j2") }}'
   notify: reload systemd
+  when: ansible_service_mgr == 'systemd'
 
 - name: Make sure Ansible fact directory exists
   file:
