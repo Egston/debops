@@ -50,7 +50,7 @@
     owner: 'root'
     group: 'root'
     mode: '0644'
-  when: atd_enabled|bool
+  when: atd_enabled|bool and ansible_service_mgr == 'systemd'
   notify: [ 'Reload systemd units', 'Restart atd' ]
 
 - name: Configure /etc/at.allow
